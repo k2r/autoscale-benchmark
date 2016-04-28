@@ -1,6 +1,3 @@
-/**
- * 
- */
 package stormBench.stormBench;
 
 import java.util.Map;
@@ -15,18 +12,14 @@ import org.apache.storm.shade.com.google.common.collect.Maps;
 import backtype.storm.Config;
 import backtype.storm.StormSubmitter;
 import backtype.storm.topology.TopologyBuilder;
-import stormBench.stormBench.operator.bolt.DiamondHeatwaveBolt;
-import stormBench.stormBench.operator.spout.ElementSpout;
+import stormBench.stormBench.operator.bolt.StarHeatwaveBolt;
+import stormBench.stormBench.operator.spout.StarElementSpout;
 import stormBench.stormBench.utils.FieldNames;
 import stormBench.stormBench.utils.XmlTopologyConfigParser;
 
-/**
- * @author Roland
- *
- */
-public class DiamondTopology {
-
-	protected static final String DIAMOND_TABLE = "diamond";
+public class StarTopology {
+	
+	protected static final String STAR_TABLE = "star";
 	protected static final String JDBC_CONF = "jdbc.conf";
 	
 	public static void main(String[] args) throws Exception {
@@ -53,40 +46,42 @@ public class DiamondTopology {
         ConnectionProvider connectionProvider = new HikariCPConnectionProvider(map);
         connectionProvider.prepare();
 
-        JdbcMapper jdbcMapperBench = new SimpleJdbcMapper(DIAMOND_TABLE, connectionProvider);
+        JdbcMapper jdbcMapperBench = new SimpleJdbcMapper(STAR_TABLE, connectionProvider);
         JdbcInsertBolt PersistanceBolt = new JdbcInsertBolt(connectionProvider, jdbcMapperBench)
-        		.withInsertQuery("insert into diamond values (?,?,?,?,?,?)")
+        		.withInsertQuery("insert into star values (?,?,?,?,?,?)")
         		.withQueryTimeoutSecs(5);
-        
-        ElementSpout spout = new ElementSpout(sgHost, sgPort);
         
         /**
          * Declaration of the diamond topology
          */
         TopologyBuilder builder = new TopologyBuilder();
         
-        builder.setSpout("source", spout);
+        builder.setSpout(FieldNames.LYON.toString(), new StarElementSpout(sgHost, sgPort, FieldNames.LYON.toString()));
         
-        builder.setBolt(FieldNames.LYON.toString(), new DiamondHeatwaveBolt(FieldNames.LYON.toString(), 28))
-        .shuffleGrouping("source", FieldNames.LYON.toString());
+        builder.setSpout(FieldNames.VILLEUR.toString(), new StarElementSpout(sgHost, sgPort, FieldNames.VILLEUR.toString()));
         
-        builder.setBolt(FieldNames.VILLEUR.toString(), new DiamondHeatwaveBolt(FieldNames.VILLEUR.toString(), 30))
-        .shuffleGrouping("source", FieldNames.VILLEUR.toString());
+        builder.setSpout(FieldNames.VAULX.toString(), new StarElementSpout(sgHost, sgPort, FieldNames.VAULX.toString()));
         
-        builder.setBolt(FieldNames.VAULX.toString(), new DiamondHeatwaveBolt(FieldNames.VAULX.toString(), 26))
-        .shuffleGrouping("source", FieldNames.VAULX.toString());
-        
-        builder.setBolt("sink", PersistanceBolt)
+        builder.setBolt("intermediate", new StarHeatwaveBolt())
         .shuffleGrouping(FieldNames.LYON.toString())
         .shuffleGrouping(FieldNames.VILLEUR.toString())
         .shuffleGrouping(FieldNames.VAULX.toString());
+        		
+        builder.setBolt("sinkLyon", PersistanceBolt)
+        .shuffleGrouping("intermediate", FieldNames.LYON.toString());
+        
+        builder.setBolt("sinkVilleurbanne", PersistanceBolt)
+        .shuffleGrouping("intermediate", FieldNames.VILLEUR.toString());
+        
+        builder.setBolt("sinkVaulx", PersistanceBolt)
+        .shuffleGrouping("intermediate", FieldNames.VILLEUR.toString());
         
         /**
          * Configuration of metadata of the topology
          */
         Config config = new Config();
         config.put(JDBC_CONF, map);
-        
+		
 		/**
 		 * Call to the topology submitter for storm
 		 */

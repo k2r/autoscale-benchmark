@@ -1,7 +1,4 @@
-/**
- * 
- */
-package stormBench.stormBench.diamond.spout;
+package stormBench.stormBench.operator.spout;
 
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
@@ -20,28 +17,26 @@ import core.element.element2.IElement2;
 import core.network.rmi.source.IRMIStreamSource;
 import stormBench.stormBench.utils.FieldNames;
 
-/**
- * @author Roland
- *
- */
-public class ElementSpout implements IRichSpout {
+public class StarElementSpout implements IRichSpout{
 
 	/**
 	 * 
 	 */
-	private static final long serialVersionUID = -299357684149329360L;
-	private static Logger logger = Logger.getLogger("ElementSpoutLogger");
+	private static final long serialVersionUID = -4518942820765585842L;
+	private static Logger logger = Logger.getLogger("StarElementSpoutLogger");
 	private String host;
 	private int port;
+	private String city;
 	private SpoutOutputCollector collector;
 	private int msgId;
 
 	/**
 	 * 
 	 */
-	public ElementSpout(String host, int port) {
+	public StarElementSpout(String host, int port, String city) {
 		this.host = host;
 		this.port = port;
+		this.city = city;
 	}
 	
 	/**
@@ -58,7 +53,7 @@ public class ElementSpout implements IRichSpout {
 				input = stub.getInputStream();
             }
 		}catch(Exception e){
-			ElementSpout.logger.severe("Client exception: " + e.toString());
+			StarElementSpout.logger.severe("Client exception: " + e.toString());
 			e.printStackTrace();
 		}
 		return input;
@@ -77,7 +72,7 @@ public class ElementSpout implements IRichSpout {
 				input = stub.getAttrNames();
             }
 		}catch(Exception e){
-			ElementSpout.logger.severe("Client exception: " + e.toString());
+			StarElementSpout.logger.severe("Client exception: " + e.toString());
 			e.printStackTrace();
 		}
 		return input;
@@ -98,7 +93,7 @@ public class ElementSpout implements IRichSpout {
 	 */
 	@Override
 	public void close() {
-		ElementSpout.logger.info("ElementSpout " + ElementSpout.serialVersionUID + " is being closed.");
+		StarElementSpout.logger.info("StarElementSpout " + StarElementSpout.serialVersionUID + " is being closed.");
 	}
 
 	/* (non-Javadoc)
@@ -106,7 +101,7 @@ public class ElementSpout implements IRichSpout {
 	 */
 	@Override
 	public void activate() {
-		ElementSpout.logger.info("ElementSpout " + ElementSpout.serialVersionUID + " is being activated.");
+		StarElementSpout.logger.info("StarElementSpout " + StarElementSpout.serialVersionUID + " is being activated.");
 	}
 
 	/* (non-Javadoc)
@@ -114,7 +109,7 @@ public class ElementSpout implements IRichSpout {
 	 */
 	@Override
 	public void deactivate() {
-		ElementSpout.logger.info("ElementSpout " + ElementSpout.serialVersionUID + " is being deactivated.");
+		StarElementSpout.logger.info("StarElementSpout " + StarElementSpout.serialVersionUID + " is being deactivated.");
 	}
 
 	/* (non-Javadoc)
@@ -138,8 +133,10 @@ public class ElementSpout implements IRichSpout {
 			case(3):	streamId = FieldNames.VAULX.toString();
 						break;
 			}
-			this.collector.emit(streamId, new Values(temperature), this.msgId);
-			this.msgId++;
+			if(streamId.equalsIgnoreCase(this.city)){
+				this.collector.emit(new Values(temperature), this.msgId);
+				this.msgId++;
+			}
 		}
 	}
 
@@ -149,7 +146,7 @@ public class ElementSpout implements IRichSpout {
 	@Override
 	public void ack(Object msgId) {
 		Integer id  = (Integer) msgId;
-		ElementSpout.logger.fine("ElementSpout " + ElementSpout.serialVersionUID + " acked tuple " + id + ".");
+		StarElementSpout.logger.fine("StarElementSpout " + StarElementSpout.serialVersionUID + " acked tuple " + id + ".");
 	}
 
 	/* (non-Javadoc)
@@ -158,7 +155,7 @@ public class ElementSpout implements IRichSpout {
 	@Override
 	public void fail(Object msgId) {
 		Integer id  = (Integer) msgId;
-		ElementSpout.logger.fine("ElementSpout " + ElementSpout.serialVersionUID + " failed tuple " + id + ".");
+		StarElementSpout.logger.fine("StarElementSpout " + StarElementSpout.serialVersionUID + " failed tuple " + id + ".");
 	}
 
 	/* (non-Javadoc)
@@ -166,9 +163,7 @@ public class ElementSpout implements IRichSpout {
 	 */
 	@Override
 	public void declareOutputFields(OutputFieldsDeclarer declarer) {
-		declarer.declareStream(FieldNames.LYON.toString(), new Fields(FieldNames.TEMPERATURE.toString()));
-		declarer.declareStream(FieldNames.VILLEUR.toString(), new Fields(FieldNames.TEMPERATURE.toString()));
-		declarer.declareStream(FieldNames.VAULX.toString(), new Fields(FieldNames.TEMPERATURE.toString()));
+		declarer.declare(new Fields(FieldNames.TEMPERATURE.toString()));
 	}
 
 	/* (non-Javadoc)
@@ -178,5 +173,4 @@ public class ElementSpout implements IRichSpout {
 	public Map<String, Object> getComponentConfiguration() {
 		return null;
 	}
-
 }

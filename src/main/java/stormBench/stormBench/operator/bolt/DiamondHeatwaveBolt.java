@@ -1,7 +1,7 @@
 /**
  * 
  */
-package stormBench.stormBench.diamond.bolt;
+package stormBench.stormBench.operator.bolt;
 
 import java.util.Map;
 import java.util.logging.Logger;
@@ -18,13 +18,13 @@ import stormBench.stormBench.utils.FieldNames;
  * @author Roland
  *
  */
-public class HeatwaveBolt implements IRichBolt {
+public class DiamondHeatwaveBolt implements IRichBolt {
 
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = -9130053201772106746L;
-	private static Logger logger = Logger.getLogger("HeatwaveBolt");;
+	private static Logger logger = Logger.getLogger("DiamondHeatwaveBolt");;
 	private OutputCollector collector;
 	private int refValue;
 	private String city;
@@ -32,7 +32,7 @@ public class HeatwaveBolt implements IRichBolt {
 	private double latitude;
 	private double longitude;
 	
-	public HeatwaveBolt(String city, int refValue) {
+	public DiamondHeatwaveBolt(String city, int refValue) {
 		this.city = city;
 		this.refValue = refValue;
 		if(city.equalsIgnoreCase(FieldNames.LYON.toString())){
@@ -56,7 +56,7 @@ public class HeatwaveBolt implements IRichBolt {
 	 * @see backtype.storm.topology.IComponent#declareOutputFields(backtype.storm.topology.OutputFieldsDeclarer)
 	 */
 	public void declareOutputFields(OutputFieldsDeclarer arg0) {
-		arg0.declare(new Fields(FieldNames.CITY.toString(), FieldNames.ZIP.toString(), FieldNames.LAT.toString(), FieldNames.LONGIT.toString(), FieldNames.TEMPERATURE.toString()));
+		arg0.declare(new Fields(FieldNames.ID.toString(), FieldNames.CITY.toString(), FieldNames.ZIP.toString(), FieldNames.LAT.toString(), FieldNames.LONGIT.toString(), FieldNames.TEMPERATURE.toString()));
 	}
 
 	/* (non-Javadoc)
@@ -70,7 +70,7 @@ public class HeatwaveBolt implements IRichBolt {
 	 * @see backtype.storm.topology.IBasicBolt#cleanup()
 	 */
 	public void cleanup() {
-		HeatwaveBolt.logger.info("HeatwaveBolt " + HeatwaveBolt.serialVersionUID + " is going to shutdown");
+		DiamondHeatwaveBolt.logger.info("DiamondHeatwaveBolt " + DiamondHeatwaveBolt.serialVersionUID + " is going to shutdown");
 	}
 	
 	/* (non-Javadoc)
@@ -79,7 +79,7 @@ public class HeatwaveBolt implements IRichBolt {
 	public void execute(Tuple arg0) {
 		int temperature = arg0.getIntegerByField(FieldNames.TEMPERATURE.toString());
 		if(temperature > this.refValue){
-			collector.emit(arg0, new Values(this.city, this.zipCode, this.latitude, this.longitude, temperature));
+			collector.emit(arg0, new Values(0, this.city, this.zipCode, this.latitude, this.longitude, temperature));
 			collector.ack(arg0);
 		}
 	}

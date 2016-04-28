@@ -1,11 +1,12 @@
 package stormBench.stormBench.utils;
 
 public enum FieldNames {
-	TEMPERATURE("temperature"),
+	ID("id"),
 	CITY("city"),
 	ZIP("zipCode"),
 	LAT("latitude"),
 	LONGIT("longitude"),
+	TEMPERATURE("temperature"),
 	LYON("Lyon"),
 	VILLEUR("Villeurbanne"),
 	VAULX("Vaulx");

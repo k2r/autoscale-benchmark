@@ -29,7 +29,6 @@ public class XmlTopologyConfigParser {
 	private String sgHost;
 	private String sgPort;
 	private String dbHost;
-	private String nbSupervisor;
 	private String windowSize;
 	private String windowStep;
 	
@@ -113,20 +112,6 @@ public class XmlTopologyConfigParser {
 	public void setDbHost(String dbHost){
 		this.dbHost = dbHost;
 	}
-	
-	/**
-	 * @return the nbSupervisor
-	 */
-	public String getNbSupervisors() {
-		return nbSupervisor;
-	}
-
-	/**
-	 * @param nbSupervisor the nbSupervisor to set
-	 */
-	public void setNbSupervisors(String nbWorkers) {
-		this.nbSupervisor = nbWorkers;
-	}
 
 	/**
 	 * @return the windowSize
@@ -167,8 +152,6 @@ public class XmlTopologyConfigParser {
 		this.setSgHost(sghost.item(0).getTextContent());
 		final NodeList dbhost = parameters.getElementsByTagName(TopologyConfigNodeNames.DBHOST.toString());
 		this.setDbHost(dbhost.item(0).getTextContent());
-		final NodeList nbworkers = parameters.getElementsByTagName(TopologyConfigNodeNames.NBSUPERVISORS.toString());
-		this.setNbSupervisors(nbworkers.item(0).getTextContent());
 		final NodeList size = parameters.getElementsByTagName(TopologyConfigNodeNames.SIZE.toString());
 		this.setWindowSize(size.item(0).getTextContent());
 		final NodeList step = parameters.getElementsByTagName(TopologyConfigNodeNames.STEP.toString());
