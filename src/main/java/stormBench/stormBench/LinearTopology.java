@@ -19,7 +19,7 @@ import stormBench.stormBench.utils.XmlTopologyConfigParser;
 
 public class LinearTopology {
 
-	protected static final String LINEAR_TABLE = "linear";
+	protected static final String LINEAR_TABLE = "lineartopology";
 	protected static final String JDBC_CONF = "jdbc.conf";
 	
 	public static void main(String[] args) throws Exception {
@@ -33,6 +33,8 @@ public class LinearTopology {
 		String topId = parameters.getTopId();
 		String sgHost = parameters.getSgHost();
 		int sgPort = Integer.parseInt(parameters.getSgPort());
+		int nbTasks = Integer.parseInt(parameters.getNbTasks());
+		int nbExecutors = Integer.parseInt(parameters.getNbExecutors());
 		String dbHost = parameters.getDbHost();
 		
 		Map<String, Object> map = Maps.newHashMap();
@@ -49,7 +51,7 @@ public class LinearTopology {
         JdbcMapper jdbcMapperBench = new SimpleJdbcMapper(LINEAR_TABLE, connectionProvider);
         JdbcInsertBolt PersistanceBolt = new JdbcInsertBolt(connectionProvider, jdbcMapperBench)
         		.withTableName(LINEAR_TABLE)
-        		.withQueryTimeoutSecs(5);
+        		.withQueryTimeoutSecs(30);
         
         ElementSpout spout = new ElementSpout(sgHost, sgPort);
         
@@ -58,15 +60,17 @@ public class LinearTopology {
          */
         TopologyBuilder builder = new TopologyBuilder();
         
-        builder.setSpout("source", spout);
+        builder.setSpout("source", spout, nbExecutors).setNumTasks(nbTasks);
         
-        builder.setBolt("intermediate", new LinearHeatwaveBolt())
+        builder.setBolt("intermediate", new LinearHeatwaveBolt(), nbExecutors).setNumTasks(nbTasks)
         .shuffleGrouping("source", FieldNames.LYON.toString())
         .shuffleGrouping("source", FieldNames.VILLEUR.toString())
         .shuffleGrouping("source", FieldNames.VAULX.toString());
         		
-        builder.setBolt("sink", PersistanceBolt)
-        .shuffleGrouping("intermediate");
+        builder.setBolt("sink", PersistanceBolt, nbExecutors).setNumTasks(nbTasks)
+        .shuffleGrouping("intermediate", FieldNames.LYON.toString())
+        .shuffleGrouping("intermediate", FieldNames.VILLEUR.toString())
+        .shuffleGrouping("intermediate", FieldNames.VAULX.toString());
         
         /**
          * Configuration of metadata of the topology

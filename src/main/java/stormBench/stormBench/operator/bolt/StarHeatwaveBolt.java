@@ -91,6 +91,8 @@ public class StarHeatwaveBolt implements IRichBolt{
 						Double.parseDouble(this.lyon.get(latitude)), Double.parseDouble(this.lyon.get(longitude)),
 						temperature));
 				collector.ack(arg0);
+			}else{
+				collector.ack(arg0);
 			}
 		}
 		if(streamId.equalsIgnoreCase(FieldNames.VILLEUR.toString())){
@@ -99,6 +101,8 @@ public class StarHeatwaveBolt implements IRichBolt{
 						Double.parseDouble(this.villeurbanne.get(latitude)), Double.parseDouble(this.villeurbanne.get(longitude)),
 						temperature));
 				collector.ack(arg0);
+			}else{
+				collector.ack(arg0);
 			}
 		}
 		if(streamId.equalsIgnoreCase(FieldNames.VAULX.toString())){
@@ -106,6 +110,8 @@ public class StarHeatwaveBolt implements IRichBolt{
 				collector.emit(FieldNames.VAULX.toString(), arg0, new Values(0, this.vaulx.get(city), Integer.parseInt(this.vaulx.get(zipCode)), 
 						Double.parseDouble(this.vaulx.get(latitude)), Double.parseDouble(this.vaulx.get(longitude)),
 						temperature));
+				collector.ack(arg0);
+			}else{
 				collector.ack(arg0);
 			}
 		}

@@ -10,6 +10,8 @@ public enum TopologyConfigNodeNames {
 	TOPID("topology_id"),
 	SGPORT("stream_port"),
 	SGHOST("stream_host"),
+	NBTASKS("nb_tasks"),
+	NBEXECS("nb_executors"),
 	DBHOST("database_host"),
 	SIZE("window_size"),
 	STEP("window_step");

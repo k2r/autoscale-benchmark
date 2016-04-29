@@ -19,7 +19,7 @@ import stormBench.stormBench.utils.XmlTopologyConfigParser;
 
 public class StarTopology {
 	
-	protected static final String STAR_TABLE = "star";
+	protected static final String STAR_TABLE = "startopology";
 	protected static final String JDBC_CONF = "jdbc.conf";
 	
 	public static void main(String[] args) throws Exception {
@@ -33,6 +33,8 @@ public class StarTopology {
 		String topId = parameters.getTopId();
 		String sgHost = parameters.getSgHost();
 		int sgPort = Integer.parseInt(parameters.getSgPort());
+		int nbTasks = Integer.parseInt(parameters.getNbTasks());
+		int nbExecutors = Integer.parseInt(parameters.getNbExecutors());
 		String dbHost = parameters.getDbHost();
 		
 		Map<String, Object> map = Maps.newHashMap();
@@ -48,33 +50,33 @@ public class StarTopology {
 
         JdbcMapper jdbcMapperBench = new SimpleJdbcMapper(STAR_TABLE, connectionProvider);
         JdbcInsertBolt PersistanceBolt = new JdbcInsertBolt(connectionProvider, jdbcMapperBench)
-        		.withInsertQuery("insert into star values (?,?,?,?,?,?)")
-        		.withQueryTimeoutSecs(5);
+        		.withTableName(STAR_TABLE)
+        		.withQueryTimeoutSecs(30);
         
         /**
-         * Declaration of the diamond topology
+         * Declaration of the star topology
          */
         TopologyBuilder builder = new TopologyBuilder();
         
-        builder.setSpout(FieldNames.LYON.toString(), new StarElementSpout(sgHost, sgPort, FieldNames.LYON.toString()));
+        builder.setSpout(FieldNames.LYON.toString(), new StarElementSpout(sgHost, sgPort, FieldNames.LYON.toString()), nbExecutors).setNumTasks(nbTasks);
         
-        builder.setSpout(FieldNames.VILLEUR.toString(), new StarElementSpout(sgHost, sgPort, FieldNames.VILLEUR.toString()));
+        builder.setSpout(FieldNames.VILLEUR.toString(), new StarElementSpout(sgHost, sgPort, FieldNames.VILLEUR.toString()), nbExecutors).setNumTasks(nbTasks);
         
-        builder.setSpout(FieldNames.VAULX.toString(), new StarElementSpout(sgHost, sgPort, FieldNames.VAULX.toString()));
+        builder.setSpout(FieldNames.VAULX.toString(), new StarElementSpout(sgHost, sgPort, FieldNames.VAULX.toString()), nbExecutors).setNumTasks(nbTasks);
         
-        builder.setBolt("intermediate", new StarHeatwaveBolt())
-        .shuffleGrouping(FieldNames.LYON.toString())
-        .shuffleGrouping(FieldNames.VILLEUR.toString())
-        .shuffleGrouping(FieldNames.VAULX.toString());
+        builder.setBolt("intermediate", new StarHeatwaveBolt(), nbExecutors).setNumTasks(nbTasks)
+        .shuffleGrouping(FieldNames.LYON.toString(), FieldNames.LYON.toString())
+        .shuffleGrouping(FieldNames.VILLEUR.toString(), FieldNames.VILLEUR.toString())
+        .shuffleGrouping(FieldNames.VAULX.toString(), FieldNames.VAULX.toString());
         		
-        builder.setBolt("sinkLyon", PersistanceBolt)
+        builder.setBolt("sinkLyon", PersistanceBolt, nbExecutors).setNumTasks(nbTasks)
         .shuffleGrouping("intermediate", FieldNames.LYON.toString());
         
-        builder.setBolt("sinkVilleurbanne", PersistanceBolt)
+        builder.setBolt("sinkVilleurbanne", PersistanceBolt, nbExecutors).setNumTasks(nbTasks)
         .shuffleGrouping("intermediate", FieldNames.VILLEUR.toString());
         
-        builder.setBolt("sinkVaulx", PersistanceBolt)
-        .shuffleGrouping("intermediate", FieldNames.VILLEUR.toString());
+        builder.setBolt("sinkVaulx", PersistanceBolt, nbExecutors).setNumTasks(nbTasks)
+        .shuffleGrouping("intermediate", FieldNames.VAULX.toString());
         
         /**
          * Configuration of metadata of the topology

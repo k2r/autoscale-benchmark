@@ -26,7 +26,7 @@ import stormBench.stormBench.utils.XmlTopologyConfigParser;
  */
 public class DiamondTopology {
 
-	protected static final String DIAMOND_TABLE = "diamond";
+	protected static final String DIAMOND_TABLE = "diamondtopology";
 	protected static final String JDBC_CONF = "jdbc.conf";
 	
 	public static void main(String[] args) throws Exception {
@@ -40,6 +40,8 @@ public class DiamondTopology {
 		String topId = parameters.getTopId();
 		String sgHost = parameters.getSgHost();
 		int sgPort = Integer.parseInt(parameters.getSgPort());
+		int nbTasks = Integer.parseInt(parameters.getNbTasks());
+		int nbExecutors = Integer.parseInt(parameters.getNbExecutors());
 		String dbHost = parameters.getDbHost();
 		
 		Map<String, Object> map = Maps.newHashMap();
@@ -55,8 +57,8 @@ public class DiamondTopology {
 
         JdbcMapper jdbcMapperBench = new SimpleJdbcMapper(DIAMOND_TABLE, connectionProvider);
         JdbcInsertBolt PersistanceBolt = new JdbcInsertBolt(connectionProvider, jdbcMapperBench)
-        		.withInsertQuery("insert into diamond values (?,?,?,?,?,?)")
-        		.withQueryTimeoutSecs(5);
+        		.withTableName(DIAMOND_TABLE)
+        		.withQueryTimeoutSecs(30);
         
         ElementSpout spout = new ElementSpout(sgHost, sgPort);
         
@@ -65,21 +67,21 @@ public class DiamondTopology {
          */
         TopologyBuilder builder = new TopologyBuilder();
         
-        builder.setSpout("source", spout);
+        builder.setSpout("source", spout, nbExecutors).setNumTasks(nbTasks);
         
-        builder.setBolt(FieldNames.LYON.toString(), new DiamondHeatwaveBolt(FieldNames.LYON.toString(), 28))
+        builder.setBolt(FieldNames.LYON.toString(), new DiamondHeatwaveBolt(FieldNames.LYON.toString(), 28), nbExecutors).setNumTasks(nbTasks)
         .shuffleGrouping("source", FieldNames.LYON.toString());
         
-        builder.setBolt(FieldNames.VILLEUR.toString(), new DiamondHeatwaveBolt(FieldNames.VILLEUR.toString(), 30))
+        builder.setBolt(FieldNames.VILLEUR.toString(), new DiamondHeatwaveBolt(FieldNames.VILLEUR.toString(), 30), nbExecutors).setNumTasks(nbTasks)
         .shuffleGrouping("source", FieldNames.VILLEUR.toString());
         
-        builder.setBolt(FieldNames.VAULX.toString(), new DiamondHeatwaveBolt(FieldNames.VAULX.toString(), 26))
+        builder.setBolt(FieldNames.VAULX.toString(), new DiamondHeatwaveBolt(FieldNames.VAULX.toString(), 26), nbExecutors).setNumTasks(nbTasks)
         .shuffleGrouping("source", FieldNames.VAULX.toString());
         
-        builder.setBolt("sink", PersistanceBolt)
-        .shuffleGrouping(FieldNames.LYON.toString())
-        .shuffleGrouping(FieldNames.VILLEUR.toString())
-        .shuffleGrouping(FieldNames.VAULX.toString());
+        builder.setBolt("sink", PersistanceBolt, nbExecutors).setNumTasks(nbTasks)
+        .shuffleGrouping(FieldNames.LYON.toString(), FieldNames.LYON.toString())
+        .shuffleGrouping(FieldNames.VILLEUR.toString(), FieldNames.VILLEUR.toString())
+        .shuffleGrouping(FieldNames.VAULX.toString(), FieldNames.VAULX.toString());
         
         /**
          * Configuration of metadata of the topology

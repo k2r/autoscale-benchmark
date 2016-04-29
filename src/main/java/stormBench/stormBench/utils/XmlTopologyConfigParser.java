@@ -28,6 +28,8 @@ public class XmlTopologyConfigParser {
 	private String topologyId;
 	private String sgHost;
 	private String sgPort;
+	private String nbTasks;
+	private String nbExecutors;
 	private String dbHost;
 	private String windowSize;
 	private String windowStep;
@@ -105,6 +107,34 @@ public class XmlTopologyConfigParser {
 		this.sgHost = sgHost;
 	}
 
+	/**
+	 * @return the nbTasks
+	 */
+	public String getNbTasks() {
+		return nbTasks;
+	}
+
+	/**
+	 * @param nbTasks the nbTasks to set
+	 */
+	public void setNbTasks(String nbTasks) {
+		this.nbTasks = nbTasks;
+	}
+
+	/**
+	 * @return the nbExecutors
+	 */
+	public String getNbExecutors() {
+		return nbExecutors;
+	}
+
+	/**
+	 * @param nbExecutors the nbExecutors to set
+	 */
+	public void setNbExecutors(String nbExecutors) {
+		this.nbExecutors = nbExecutors;
+	}
+
 	public String getDbHost(){
 		return this.dbHost;
 	}
@@ -150,6 +180,10 @@ public class XmlTopologyConfigParser {
 		this.setSgPort(sgport.item(0).getTextContent());
 		final NodeList sghost = parameters.getElementsByTagName(TopologyConfigNodeNames.SGHOST.toString());
 		this.setSgHost(sghost.item(0).getTextContent());
+		final NodeList nbtasks = parameters.getElementsByTagName(TopologyConfigNodeNames.NBTASKS.toString());
+		this.setNbTasks(nbtasks.item(0).getTextContent());
+		final NodeList nbexecutors = parameters.getElementsByTagName(TopologyConfigNodeNames.NBEXECS.toString());
+		this.setNbExecutors(nbexecutors.item(0).getTextContent());
 		final NodeList dbhost = parameters.getElementsByTagName(TopologyConfigNodeNames.DBHOST.toString());
 		this.setDbHost(dbhost.item(0).getTextContent());
 		final NodeList size = parameters.getElementsByTagName(TopologyConfigNodeNames.SIZE.toString());

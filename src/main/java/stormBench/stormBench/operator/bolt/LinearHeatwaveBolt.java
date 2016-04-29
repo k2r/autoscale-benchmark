@@ -60,7 +60,9 @@ public class LinearHeatwaveBolt implements IRichBolt {
 	 * @see backtype.storm.topology.IComponent#declareOutputFields(backtype.storm.topology.OutputFieldsDeclarer)
 	 */
 	public void declareOutputFields(OutputFieldsDeclarer arg0) {
-		arg0.declare(new Fields(FieldNames.ID.toString(), FieldNames.CITY.toString(), FieldNames.ZIP.toString(), FieldNames.LAT.toString(), FieldNames.LONGIT.toString(), FieldNames.TEMPERATURE.toString()));
+		arg0.declareStream(FieldNames.LYON.toString(), new Fields(FieldNames.ID.toString(), FieldNames.CITY.toString(), FieldNames.ZIP.toString(), FieldNames.LAT.toString(), FieldNames.LONGIT.toString(), FieldNames.TEMPERATURE.toString()));
+		arg0.declareStream(FieldNames.VILLEUR.toString(), new Fields(FieldNames.ID.toString(), FieldNames.CITY.toString(), FieldNames.ZIP.toString(), FieldNames.LAT.toString(), FieldNames.LONGIT.toString(), FieldNames.TEMPERATURE.toString()));
+		arg0.declareStream(FieldNames.VAULX.toString(), new Fields(FieldNames.ID.toString(), FieldNames.CITY.toString(), FieldNames.ZIP.toString(), FieldNames.LAT.toString(), FieldNames.LONGIT.toString(), FieldNames.TEMPERATURE.toString()));
 	}
 
 	/* (non-Javadoc)
@@ -85,25 +87,31 @@ public class LinearHeatwaveBolt implements IRichBolt {
 		String streamId = arg0.getSourceStreamId();
 		if(streamId.equalsIgnoreCase(FieldNames.LYON.toString())){
 			if(temperature > Integer.parseInt(this.lyon.get(refValue))){
-				collector.emit(arg0, new Values(0, this.lyon.get(city), Integer.parseInt(this.lyon.get(zipCode)), 
+				collector.emit(FieldNames.LYON.toString(), arg0, new Values(0, this.lyon.get(city), Integer.parseInt(this.lyon.get(zipCode)), 
 						Double.parseDouble(this.lyon.get(latitude)), Double.parseDouble(this.lyon.get(longitude)),
 						temperature));
+				collector.ack(arg0);
+			}else{
 				collector.ack(arg0);
 			}
 		}
 		if(streamId.equalsIgnoreCase(FieldNames.VILLEUR.toString())){
 			if(temperature > Integer.parseInt(this.villeurbanne.get(refValue))){
-				collector.emit(arg0, new Values(0, this.villeurbanne.get(city), Integer.parseInt(this.villeurbanne.get(zipCode)), 
+				collector.emit(FieldNames.VILLEUR.toString(), arg0, new Values(0, this.villeurbanne.get(city), Integer.parseInt(this.villeurbanne.get(zipCode)), 
 						Double.parseDouble(this.villeurbanne.get(latitude)), Double.parseDouble(this.villeurbanne.get(longitude)),
 						temperature));
+				collector.ack(arg0);
+			}else{
 				collector.ack(arg0);
 			}
 		}
 		if(streamId.equalsIgnoreCase(FieldNames.VAULX.toString())){
 			if(temperature > Integer.parseInt(this.vaulx.get(refValue))){
-				collector.emit(arg0, new Values(0, this.vaulx.get(city), Integer.parseInt(this.vaulx.get(zipCode)), 
+				collector.emit(FieldNames.VAULX.toString(), arg0, new Values(0, this.vaulx.get(city), Integer.parseInt(this.vaulx.get(zipCode)), 
 						Double.parseDouble(this.vaulx.get(latitude)), Double.parseDouble(this.vaulx.get(longitude)),
 						temperature));
+				collector.ack(arg0);
+			}else{
 				collector.ack(arg0);
 			}
 		}

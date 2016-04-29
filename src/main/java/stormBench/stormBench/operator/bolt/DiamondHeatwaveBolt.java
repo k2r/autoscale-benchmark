@@ -56,7 +56,7 @@ public class DiamondHeatwaveBolt implements IRichBolt {
 	 * @see backtype.storm.topology.IComponent#declareOutputFields(backtype.storm.topology.OutputFieldsDeclarer)
 	 */
 	public void declareOutputFields(OutputFieldsDeclarer arg0) {
-		arg0.declare(new Fields(FieldNames.ID.toString(), FieldNames.CITY.toString(), FieldNames.ZIP.toString(), FieldNames.LAT.toString(), FieldNames.LONGIT.toString(), FieldNames.TEMPERATURE.toString()));
+		arg0.declareStream(this.city, new Fields(FieldNames.ID.toString(), FieldNames.CITY.toString(), FieldNames.ZIP.toString(), FieldNames.LAT.toString(), FieldNames.LONGIT.toString(), FieldNames.TEMPERATURE.toString()));
 	}
 
 	/* (non-Javadoc)
@@ -79,7 +79,9 @@ public class DiamondHeatwaveBolt implements IRichBolt {
 	public void execute(Tuple arg0) {
 		int temperature = arg0.getIntegerByField(FieldNames.TEMPERATURE.toString());
 		if(temperature > this.refValue){
-			collector.emit(arg0, new Values(0, this.city, this.zipCode, this.latitude, this.longitude, temperature));
+			collector.emit(this.city, arg0, new Values(0, this.city, this.zipCode, this.latitude, this.longitude, temperature));
+			collector.ack(arg0);
+		}else{
 			collector.ack(arg0);
 		}
 	}

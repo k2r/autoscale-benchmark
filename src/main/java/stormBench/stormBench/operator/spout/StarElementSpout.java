@@ -134,7 +134,7 @@ public class StarElementSpout implements IRichSpout{
 						break;
 			}
 			if(streamId.equalsIgnoreCase(this.city)){
-				this.collector.emit(new Values(temperature), this.msgId);
+				this.collector.emit(streamId, new Values(temperature), this.msgId);
 				this.msgId++;
 			}
 		}
@@ -163,7 +163,9 @@ public class StarElementSpout implements IRichSpout{
 	 */
 	@Override
 	public void declareOutputFields(OutputFieldsDeclarer declarer) {
-		declarer.declare(new Fields(FieldNames.TEMPERATURE.toString()));
+		declarer.declareStream(FieldNames.LYON.toString(), new Fields(FieldNames.TEMPERATURE.toString()));
+		declarer.declareStream(FieldNames.VILLEUR.toString(), new Fields(FieldNames.TEMPERATURE.toString()));
+		declarer.declareStream(FieldNames.VAULX.toString(), new Fields(FieldNames.TEMPERATURE.toString()));
 	}
 
 	/* (non-Javadoc)
