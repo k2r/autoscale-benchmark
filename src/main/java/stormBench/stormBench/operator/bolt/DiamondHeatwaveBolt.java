@@ -3,6 +3,7 @@
  */
 package stormBench.stormBench.operator.bolt;
 
+import java.sql.SQLException;
 import java.util.Map;
 import java.util.logging.Logger;
 import backtype.storm.task.OutputCollector;
@@ -12,6 +13,7 @@ import backtype.storm.topology.OutputFieldsDeclarer;
 import backtype.storm.tuple.Fields;
 import backtype.storm.tuple.Tuple;
 import backtype.storm.tuple.Values;
+import stormBench.stormBench.hook.BenchHook;
 import stormBench.stormBench.utils.FieldNames;
 
 /**
@@ -26,6 +28,7 @@ public class DiamondHeatwaveBolt implements IRichBolt {
 	private static final long serialVersionUID = -9130053201772106746L;
 	private static Logger logger = Logger.getLogger("DiamondHeatwaveBolt");;
 	private OutputCollector collector;
+	private String dbHost;
 	private int refValue;
 	private String city;
 	private int zipCode;
@@ -50,6 +53,11 @@ public class DiamondHeatwaveBolt implements IRichBolt {
 			this.latitude = 45.788227;
 			this.longitude = 4.928159;
 		}
+	}
+	
+	public DiamondHeatwaveBolt(String city, int refValue, String dbHost) {
+		this(city, refValue);
+		this.dbHost = dbHost;
 	}
 	
 	/* (non-Javadoc)
@@ -90,8 +98,15 @@ public class DiamondHeatwaveBolt implements IRichBolt {
 	 * @see backtype.storm.topology.IRichBolt#prepare(java.util.Map, backtype.storm.task.TopologyContext, backtype.storm.task.OutputCollector)
 	 */
 	@SuppressWarnings("rawtypes")
-	public void prepare(Map arg0, TopologyContext arg1, OutputCollector arg2) {
-		this.collector = arg2;
+	public void prepare(Map arg0, TopologyContext context, OutputCollector collector) {
+		this.collector = collector;
+		try {
+			context.addTaskHook(new BenchHook(this.dbHost));
+		} catch (ClassNotFoundException e) {
+			logger.warning("Hook can not be attached to ElementSpout " + DiamondHeatwaveBolt.serialVersionUID + " because the JDBC driver can not be found, error: " + e );
+		} catch (SQLException e) {
+			logger.warning("Hook can not be attached to ElementSpout " + DiamondHeatwaveBolt.serialVersionUID + " because of invalid JDBC configuration , error: " + e);
+		}
 	}
 
 }

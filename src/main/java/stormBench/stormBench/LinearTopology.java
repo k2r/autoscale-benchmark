@@ -2,7 +2,6 @@ package stormBench.stormBench;
 
 import java.util.Map;
 
-import org.apache.storm.jdbc.bolt.JdbcInsertBolt;
 import org.apache.storm.jdbc.common.ConnectionProvider;
 import org.apache.storm.jdbc.common.HikariCPConnectionProvider;
 import org.apache.storm.jdbc.mapper.JdbcMapper;
@@ -12,6 +11,7 @@ import org.apache.storm.shade.com.google.common.collect.Maps;
 import backtype.storm.Config;
 import backtype.storm.StormSubmitter;
 import backtype.storm.topology.TopologyBuilder;
+import stormBench.stormBench.operator.bolt.HookableJdbcInsertBolt;
 import stormBench.stormBench.operator.bolt.LinearHeatwaveBolt;
 import stormBench.stormBench.operator.spout.ElementSpout;
 import stormBench.stormBench.utils.FieldNames;
@@ -49,11 +49,11 @@ public class LinearTopology {
         connectionProvider.prepare();
 
         JdbcMapper jdbcMapperBench = new SimpleJdbcMapper(LINEAR_TABLE, connectionProvider);
-        JdbcInsertBolt PersistanceBolt = new JdbcInsertBolt(connectionProvider, jdbcMapperBench)
+        HookableJdbcInsertBolt PersistanceBolt = new HookableJdbcInsertBolt(connectionProvider, jdbcMapperBench, dbHost)
         		.withTableName(LINEAR_TABLE)
         		.withQueryTimeoutSecs(30);
         
-        ElementSpout spout = new ElementSpout(sgHost, sgPort);
+        ElementSpout spout = new ElementSpout(sgHost, sgPort, dbHost);
         
         /**
          * Declaration of the linear topology
@@ -62,7 +62,7 @@ public class LinearTopology {
         
         builder.setSpout("source", spout, nbExecutors).setNumTasks(nbTasks);
         
-        builder.setBolt("intermediate", new LinearHeatwaveBolt(), nbExecutors).setNumTasks(nbTasks)
+        builder.setBolt("intermediate", new LinearHeatwaveBolt(dbHost), nbExecutors).setNumTasks(nbTasks)
         .shuffleGrouping("source", FieldNames.LYON.toString())
         .shuffleGrouping("source", FieldNames.VILLEUR.toString())
         .shuffleGrouping("source", FieldNames.VAULX.toString());

@@ -5,6 +5,7 @@ package stormBench.stormBench.operator.spout;
 
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.logging.Logger;
@@ -18,6 +19,7 @@ import backtype.storm.tuple.Values;
 import core.element.IElement;
 import core.element.element2.IElement2;
 import core.network.rmi.source.IRMIStreamSource;
+import stormBench.stormBench.hook.BenchHook;
 import stormBench.stormBench.utils.FieldNames;
 
 /**
@@ -33,6 +35,7 @@ public class ElementSpout implements IRichSpout {
 	private static Logger logger = Logger.getLogger("ElementSpoutLogger");
 	private String host;
 	private int port;
+	private String dbHost;
 	private SpoutOutputCollector collector;
 	private int msgId;
 
@@ -42,6 +45,12 @@ public class ElementSpout implements IRichSpout {
 	public ElementSpout(String host, int port) {
 		this.host = host;
 		this.port = port;
+		this.dbHost = null;
+	}
+	
+	public ElementSpout(String host, int port, String dbHost) {
+		this(host, port);
+		this.dbHost = dbHost;
 	}
 	
 	/**
@@ -91,6 +100,13 @@ public class ElementSpout implements IRichSpout {
 	public void open(Map conf, TopologyContext context, SpoutOutputCollector collector) {
 		this.collector = collector;
 		this.msgId = 0;
+		try {
+			context.addTaskHook(new BenchHook(this.dbHost));
+		} catch (ClassNotFoundException e) {
+			logger.warning("Hook can not be attached to ElementSpout " + ElementSpout.serialVersionUID + " because the JDBC driver can not be found, error: " + e );
+		} catch (SQLException e) {
+			logger.warning("Hook can not be attached to ElementSpout " + ElementSpout.serialVersionUID + " because of invalid JDBC configuration , error: " + e);
+		}
 	}
 
 	/* (non-Javadoc)

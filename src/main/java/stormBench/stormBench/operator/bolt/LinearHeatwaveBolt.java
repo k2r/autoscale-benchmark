@@ -1,5 +1,6 @@
 package stormBench.stormBench.operator.bolt;
 
+import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Logger;
@@ -11,6 +12,7 @@ import backtype.storm.topology.OutputFieldsDeclarer;
 import backtype.storm.tuple.Fields;
 import backtype.storm.tuple.Tuple;
 import backtype.storm.tuple.Values;
+import stormBench.stormBench.hook.BenchHook;
 import stormBench.stormBench.utils.FieldNames;
 
 public class LinearHeatwaveBolt implements IRichBolt {
@@ -21,6 +23,7 @@ public class LinearHeatwaveBolt implements IRichBolt {
 	private static final long serialVersionUID = 4262369370788107343L;
 	private static Logger logger = Logger.getLogger("LinearHeatwaveBolt");
 	private OutputCollector collector;
+	private String dbHost;
 	
 	private static final String city = "city";
 	private static final String refValue = "refValue";
@@ -54,6 +57,11 @@ public class LinearHeatwaveBolt implements IRichBolt {
 		this.vaulx.put(zipCode, "69120");
 		this.vaulx.put(latitude, "45.788227");
 		this.vaulx.put(longitude, "4.928159");
+	}
+	
+	public LinearHeatwaveBolt(String dbHost){
+		this();
+		this.dbHost = dbHost;
 	}
 	
 	/* (non-Javadoc)
@@ -121,7 +129,14 @@ public class LinearHeatwaveBolt implements IRichBolt {
 	 * @see backtype.storm.topology.IRichBolt#prepare(java.util.Map, backtype.storm.task.TopologyContext, backtype.storm.task.OutputCollector)
 	 */
 	@SuppressWarnings("rawtypes")
-	public void prepare(Map arg0, TopologyContext arg1, OutputCollector arg2) {
-		this.collector = arg2;
+	public void prepare(Map arg0, TopologyContext context, OutputCollector collector) {
+		this.collector = collector;
+		try {
+			context.addTaskHook(new BenchHook(this.dbHost));
+		} catch (ClassNotFoundException e) {
+			logger.warning("Hook can not be attached to ElementSpout " + LinearHeatwaveBolt.serialVersionUID + " because the JDBC driver can not be found, error: " + e );
+		} catch (SQLException e) {
+			logger.warning("Hook can not be attached to ElementSpout " + LinearHeatwaveBolt.serialVersionUID + " because of invalid JDBC configuration , error: " + e);
+		}
 	}
 }
