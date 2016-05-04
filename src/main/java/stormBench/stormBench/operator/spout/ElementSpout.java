@@ -3,6 +3,8 @@
  */
 package stormBench.stormBench.operator.spout;
 
+import java.lang.management.ManagementFactory;
+import java.lang.management.ThreadMXBean;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.sql.SQLException;
@@ -10,6 +12,7 @@ import java.util.ArrayList;
 import java.util.Map;
 import java.util.logging.Logger;
 
+import backtype.storm.metric.api.CountMetric;
 import backtype.storm.spout.SpoutOutputCollector;
 import backtype.storm.task.TopologyContext;
 import backtype.storm.topology.IRichSpout;
@@ -21,6 +24,7 @@ import core.element.element2.IElement2;
 import core.network.rmi.source.IRMIStreamSource;
 import stormBench.stormBench.hook.BenchHook;
 import stormBench.stormBench.utils.FieldNames;
+import stormBench.stormBench.utils.MetricNames;
 
 /**
  * @author Roland
@@ -38,6 +42,9 @@ public class ElementSpout implements IRichSpout {
 	private String dbHost;
 	private SpoutOutputCollector collector;
 	private int msgId;
+	
+	private transient CountMetric cpuAverageLoad;
+	private ThreadMXBean threadMXBean; 
 
 	/**
 	 * 
@@ -45,6 +52,10 @@ public class ElementSpout implements IRichSpout {
 	public ElementSpout(String host, int port) {
 		this.host = host;
 		this.port = port;
+		this.threadMXBean = ManagementFactory.getThreadMXBean();
+		if(!threadMXBean.isCurrentThreadCpuTimeSupported()){
+			this.threadMXBean.setThreadCpuTimeEnabled(true);
+		}
 		this.dbHost = null;
 	}
 	
@@ -107,6 +118,7 @@ public class ElementSpout implements IRichSpout {
 		} catch (SQLException e) {
 			logger.warning("Hook can not be attached to ElementSpout " + ElementSpout.serialVersionUID + " because of invalid JDBC configuration , error: " + e);
 		}
+		initMetrics(context);
 	}
 
 	/* (non-Javadoc)
@@ -157,6 +169,7 @@ public class ElementSpout implements IRichSpout {
 			this.collector.emit(streamId, new Values(temperature), this.msgId);
 			this.msgId++;
 		}
+		updateMetrics(this.threadMXBean.getCurrentThreadCpuTime());
 	}
 
 	/* (non-Javadoc)
@@ -195,4 +208,12 @@ public class ElementSpout implements IRichSpout {
 		return null;
 	}
 
+	public void initMetrics(TopologyContext context){
+		this.cpuAverageLoad = new CountMetric();
+		context.registerMetric(MetricNames.CPU.toString(), cpuAverageLoad, 1);
+	}
+	
+	public void updateMetrics(Long threadCpuTimeNs){
+		this.cpuAverageLoad.incrBy(threadCpuTimeNs);
+	}
 }

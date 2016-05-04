@@ -58,6 +58,18 @@ public class BenchHook implements ITaskHook {
 	 */
 	@Override
 	public void emit(EmitInfo info) {
+		int msgId = 0;
+		String componentId = this.context.getComponentId(info.taskId);
+		String streamId = info.stream;
+		for(Integer targetTask : info.outTasks){
+			String component = this.context.getComponentId(targetTask);
+			String query = "";//TODO write the appropriate query according to new tables
+			try {
+				this.statement.execute(query);
+			} catch (SQLException e) {
+				logger.severe("EmitInfo persistence has failed because of SQLException " + e);
+			}
+		}
 	}
 
 	/* (non-Javadoc)
@@ -69,7 +81,7 @@ public class BenchHook implements ITaskHook {
 		String componentId = this.context.getComponentId(info.spoutTaskId);
 		int taskId = info.spoutTaskId;
 		long completeLatencyMs = info.completeLatencyMs;
-		String query = "INSERT INTO spoutack VALUES ('"+ msgId +"', '" + componentId +"', '" + taskId + "', '" + completeLatencyMs +"')";
+		String query = "";//TODO write the appropriate query according to new tables
 		try {
 			this.statement.execute(query);
 		} catch (SQLException e) {
@@ -86,7 +98,7 @@ public class BenchHook implements ITaskHook {
 		String componentId = this.context.getComponentId(info.spoutTaskId);
 		int taskId = info.spoutTaskId;
 		long failLatencyMs = info.failLatencyMs;
-		String query = "INSERT INTO spoutfail VALUES ('"+ msgId +"', '" + componentId +"', '" + taskId + "', '" + failLatencyMs +"')";
+		String query = "";//TODO write the appropriate query according to new tables
 		try {
 			this.statement.execute(query);
 		} catch (SQLException e) {
@@ -103,7 +115,7 @@ public class BenchHook implements ITaskHook {
 		String componentId = this.context.getComponentId(info.executingTaskId);
 		int taskId = info.executingTaskId;
 		long executeLatencyMs = info.executeLatencyMs;
-		String query = "INSERT INTO boltexecute VALUES ('"+ msgId +"', '" + componentId +"', '" + taskId + "', '" + executeLatencyMs +"')";
+		String query = ""; //TODO write the appropriate query according to new tables 
 		try {
 			this.statement.execute(query);
 		} catch (SQLException e) {
@@ -123,15 +135,5 @@ public class BenchHook implements ITaskHook {
 	 */
 	@Override
 	public void boltFail(BoltFailInfo info) {
-		int msgId = 0;
-		String componentId = this.context.getComponentId(info.failingTaskId);
-		int taskId = info.failingTaskId;
-		long failLatencyMs = info.failLatencyMs;
-		String query = "INSERT INTO boltfail VALUES ('"+ msgId +"', '" + componentId +"', '" + taskId + "', '" + failLatencyMs +"')";
-		try {
-			this.statement.execute(query);
-		} catch (SQLException e) {
-			logger.severe("BoltFailInfo persistence has failed because of SQLException " + e);
-		}
 	}
 }

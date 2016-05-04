@@ -3,6 +3,8 @@
  */
 package stormBench.stormBench.operator.bolt;
 
+import java.lang.management.ManagementFactory;
+import java.lang.management.ThreadMXBean;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
@@ -15,11 +17,13 @@ import org.apache.storm.jdbc.common.Column;
 import org.apache.storm.jdbc.common.ConnectionProvider;
 import org.apache.storm.jdbc.mapper.JdbcMapper;
 
+import backtype.storm.metric.api.CountMetric;
 import backtype.storm.task.OutputCollector;
 import backtype.storm.task.TopologyContext;
 import backtype.storm.topology.OutputFieldsDeclarer;
 import backtype.storm.tuple.Tuple;
 import stormBench.stormBench.hook.BenchHook;
+import stormBench.stormBench.utils.MetricNames;
 
 /**
  * @author Roland
@@ -38,6 +42,9 @@ public class HookableJdbcInsertBolt extends AbstractJdbcBolt {
 	private String tableName;
 	private String insertQuery;
 	
+	private transient CountMetric cpuAverageLoad;
+	private ThreadMXBean threadMXBean;
+	
 	/**
 	 * @param connectionProvider
 	 * @param jdbcMapper
@@ -46,6 +53,10 @@ public class HookableJdbcInsertBolt extends AbstractJdbcBolt {
 		super(connectionProvider);
 		this.jdbcMapper = jdbcMapper;
 		this.dbHost = dbHost;
+		this.threadMXBean = ManagementFactory.getThreadMXBean();
+		if(!threadMXBean.isCurrentThreadCpuTimeSupported()){
+			this.threadMXBean.setThreadCpuTimeEnabled(true);
+		}
 	}
 	
 	public HookableJdbcInsertBolt withTableName(String tableName) {
@@ -74,6 +85,7 @@ public class HookableJdbcInsertBolt extends AbstractJdbcBolt {
 		} catch (SQLException e) {
 			logger.warning("Hook can not be attached to ElementSpout " + HookableJdbcInsertBolt.serialVersionUID + " because of invalid JDBC configuration , error: " + e);
 		}
+		initMetrics(context);
 	}
 	
 	@SuppressWarnings("rawtypes")
@@ -93,11 +105,20 @@ public class HookableJdbcInsertBolt extends AbstractJdbcBolt {
             this.collector.reportError(e);
             this.collector.fail(tuple);
         }
+        updateMetrics(this.threadMXBean.getCurrentThreadCpuTime());
     }
 
 	@Override
 	public void declareOutputFields(OutputFieldsDeclarer declarer) {
 	}
 	
+	public void initMetrics(TopologyContext context){
+		this.cpuAverageLoad = new CountMetric();
+		context.registerMetric(MetricNames.CPU.toString(), cpuAverageLoad, 1);
+	}
+	
+	public void updateMetrics(Long threadCpuTimeNs){
+		this.cpuAverageLoad.incrBy(threadCpuTimeNs);
+	}
 	
 }

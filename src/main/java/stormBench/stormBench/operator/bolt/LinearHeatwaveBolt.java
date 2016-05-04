@@ -1,10 +1,13 @@
 package stormBench.stormBench.operator.bolt;
 
+import java.lang.management.ManagementFactory;
+import java.lang.management.ThreadMXBean;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Logger;
 
+import backtype.storm.metric.api.CountMetric;
 import backtype.storm.task.OutputCollector;
 import backtype.storm.task.TopologyContext;
 import backtype.storm.topology.IRichBolt;
@@ -14,6 +17,7 @@ import backtype.storm.tuple.Tuple;
 import backtype.storm.tuple.Values;
 import stormBench.stormBench.hook.BenchHook;
 import stormBench.stormBench.utils.FieldNames;
+import stormBench.stormBench.utils.MetricNames;
 
 public class LinearHeatwaveBolt implements IRichBolt {
 
@@ -24,6 +28,9 @@ public class LinearHeatwaveBolt implements IRichBolt {
 	private static Logger logger = Logger.getLogger("LinearHeatwaveBolt");
 	private OutputCollector collector;
 	private String dbHost;
+	
+	private transient CountMetric cpuAverageLoad;
+	private ThreadMXBean threadMXBean;
 	
 	private static final String city = "city";
 	private static final String refValue = "refValue";
@@ -36,6 +43,10 @@ public class LinearHeatwaveBolt implements IRichBolt {
 	private HashMap<String, String> vaulx;
 	
 	public LinearHeatwaveBolt() {
+		this.threadMXBean = ManagementFactory.getThreadMXBean();
+		if(!threadMXBean.isCurrentThreadCpuTimeSupported()){
+			this.threadMXBean.setThreadCpuTimeEnabled(true);
+		}
 		this.lyon = new HashMap<>();
 		this.villeurbanne = new HashMap<>();
 		this.vaulx = new HashMap<>();
@@ -123,6 +134,7 @@ public class LinearHeatwaveBolt implements IRichBolt {
 				collector.ack(arg0);
 			}
 		}
+		updateMetrics(this.threadMXBean.getCurrentThreadCpuTime());
 	}
 	
 	/* (non-Javadoc)
@@ -138,5 +150,15 @@ public class LinearHeatwaveBolt implements IRichBolt {
 		} catch (SQLException e) {
 			logger.warning("Hook can not be attached to ElementSpout " + LinearHeatwaveBolt.serialVersionUID + " because of invalid JDBC configuration , error: " + e);
 		}
+		initMetrics(context);
+	}
+	
+	public void initMetrics(TopologyContext context){
+		this.cpuAverageLoad = new CountMetric();
+		context.registerMetric(MetricNames.CPU.toString(), cpuAverageLoad, 1);
+	}
+	
+	public void updateMetrics(Long threadCpuTimeNs){
+		this.cpuAverageLoad.incrBy(threadCpuTimeNs);
 	}
 }

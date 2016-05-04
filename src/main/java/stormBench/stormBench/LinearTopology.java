@@ -11,6 +11,7 @@ import org.apache.storm.shade.com.google.common.collect.Maps;
 import backtype.storm.Config;
 import backtype.storm.StormSubmitter;
 import backtype.storm.topology.TopologyBuilder;
+import stormBench.stormBench.metric.JdbcConsumer;
 import stormBench.stormBench.operator.bolt.HookableJdbcInsertBolt;
 import stormBench.stormBench.operator.bolt.LinearHeatwaveBolt;
 import stormBench.stormBench.operator.spout.ElementSpout;
@@ -76,6 +77,7 @@ public class LinearTopology {
          * Configuration of metadata of the topology
          */
         Config config = new Config();
+        config.registerMetricsConsumer(JdbcConsumer.class);
         config.put(JDBC_CONF, map);
 		
 		/**
