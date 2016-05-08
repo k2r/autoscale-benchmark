@@ -3,8 +3,6 @@
  */
 package stormBench.stormBench.operator.spout;
 
-import java.lang.management.ManagementFactory;
-import java.lang.management.ThreadMXBean;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.sql.SQLException;
@@ -12,7 +10,6 @@ import java.util.ArrayList;
 import java.util.Map;
 import java.util.logging.Logger;
 
-import backtype.storm.metric.api.CountMetric;
 import backtype.storm.spout.SpoutOutputCollector;
 import backtype.storm.task.TopologyContext;
 import backtype.storm.topology.IRichSpout;
@@ -24,12 +21,12 @@ import core.element.element2.IElement2;
 import core.network.rmi.source.IRMIStreamSource;
 import stormBench.stormBench.hook.BenchHook;
 import stormBench.stormBench.utils.FieldNames;
-import stormBench.stormBench.utils.MetricNames;
 
 /**
  * @author Roland
  *
  */
+
 public class ElementSpout implements IRichSpout {
 
 	/**
@@ -43,19 +40,12 @@ public class ElementSpout implements IRichSpout {
 	private SpoutOutputCollector collector;
 	private int msgId;
 	
-	private transient CountMetric cpuAverageLoad;
-	private ThreadMXBean threadMXBean; 
-
 	/**
 	 * 
 	 */
 	public ElementSpout(String host, int port) {
 		this.host = host;
 		this.port = port;
-		this.threadMXBean = ManagementFactory.getThreadMXBean();
-		if(!threadMXBean.isCurrentThreadCpuTimeSupported()){
-			this.threadMXBean.setThreadCpuTimeEnabled(true);
-		}
 		this.dbHost = null;
 	}
 	
@@ -70,12 +60,20 @@ public class ElementSpout implements IRichSpout {
 	 * @return the last set of tuples sent by the stream source
 	 */
 	public IElement[] getInputStream(){
-		IElement[] input = null;
+		IElement[] input = new IElement[0];
 		try {
             Registry registry = LocateRegistry.getRegistry(host, port);
             if(registry != null){
-            	IRMIStreamSource stub = (IRMIStreamSource) registry.lookup("tuples");
-				input = stub.getInputStream();
+            	String[] resources = registry.list();
+            	int n = resources.length;
+            	for(int i = 0; i < n; i++){
+            		if(resources[i].equalsIgnoreCase("tuples")){
+            			IRMIStreamSource stub = (IRMIStreamSource) registry.lookup("tuples");
+        				input = stub.getInputStream();
+        				registry.unbind("tuples");
+        				break;
+            		}
+            	}
             }
 		}catch(Exception e){
 			ElementSpout.logger.severe("Client exception: " + e.toString());
@@ -95,6 +93,7 @@ public class ElementSpout implements IRichSpout {
             if(registry != null){
             	IRMIStreamSource stub = (IRMIStreamSource) registry.lookup("tuples");
 				input = stub.getAttrNames();
+				registry.unbind("tuples");
             }
 		}catch(Exception e){
 			ElementSpout.logger.severe("Client exception: " + e.toString());
@@ -102,7 +101,7 @@ public class ElementSpout implements IRichSpout {
 		}
 		return input;
 	}
-
+	
 	/* (non-Javadoc)
 	 * @see backtype.storm.spout.ISpout#open(java.util.Map, backtype.storm.task.TopologyContext, backtype.storm.spout.SpoutOutputCollector)
 	 */
@@ -118,7 +117,6 @@ public class ElementSpout implements IRichSpout {
 		} catch (SQLException e) {
 			logger.warning("Hook can not be attached to ElementSpout " + ElementSpout.serialVersionUID + " because of invalid JDBC configuration , error: " + e);
 		}
-		initMetrics(context);
 	}
 
 	/* (non-Javadoc)
@@ -153,23 +151,31 @@ public class ElementSpout implements IRichSpout {
 	public void nextTuple() {
 		IElement[] input = this.getInputStream();
 		int nbElements = input.length;
-		for(int i = 0; i < nbElements; i++){
-			IElement2 element = (IElement2) input[i];
-			Integer temperature = (Integer) element.getFirstValue();
-			Integer code = (Integer) element.getSecondValue();
-			String streamId = null;
-			switch(code){
-			case(1): 	streamId = FieldNames.LYON.toString();
-						break;
-			case(2): 	streamId = FieldNames.VILLEUR.toString();
-						break;
-			case(3):	streamId = FieldNames.VAULX.toString();
-						break;
+		if(nbElements > 0){
+			for(int i = 0; i < nbElements; i++){
+				IElement2 element = (IElement2) input[i];
+				Integer temperature = (Integer) element.getFirstValue();
+				Integer code = (Integer) element.getSecondValue();
+				String streamId = null;
+				switch(code){
+				case(1): 	streamId = FieldNames.LYON.toString();
+				break;
+				case(2): 	streamId = FieldNames.VILLEUR.toString();
+				break;
+				case(3):	streamId = FieldNames.VAULX.toString();
+				break;
+				}
+				this.collector.emit(streamId, new Values(temperature), this.msgId);
+				this.msgId++;
 			}
-			this.collector.emit(streamId, new Values(temperature), this.msgId);
-			this.msgId++;
+			return;
+		}else{
+			try {
+				Thread.sleep(1);
+			} catch (InterruptedException e) {
+				logger.severe("ElementSpout can not sleep because of " + e);
+			}
 		}
-		updateMetrics(this.threadMXBean.getCurrentThreadCpuTime());
 	}
 
 	/* (non-Javadoc)
@@ -206,14 +212,5 @@ public class ElementSpout implements IRichSpout {
 	@Override
 	public Map<String, Object> getComponentConfiguration() {
 		return null;
-	}
-
-	public void initMetrics(TopologyContext context){
-		this.cpuAverageLoad = new CountMetric();
-		context.registerMetric(MetricNames.CPU.toString(), cpuAverageLoad, 1);
-	}
-	
-	public void updateMetrics(Long threadCpuTimeNs){
-		this.cpuAverageLoad.incrBy(threadCpuTimeNs);
 	}
 }

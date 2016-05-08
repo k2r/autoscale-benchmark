@@ -24,7 +24,7 @@
 	      </descriptorRefs>
 	      <archive>
 	        <manifest>
-	          <mainClass>stormBench.stormBench.StarTopology</mainClass>
+	          <mainClass>stormBench.stormBench.LinearTopology</mainClass>
 	        </manifest>
 	      </archive>
 	    </configuration>

@@ -9,7 +9,13 @@ public enum FieldNames {
 	TEMPERATURE("temperature"),
 	LYON("Lyon"),
 	VILLEUR("Villeurbanne"),
-	VAULX("Vaulx");
+	VAULX("Vaulx"),
+	SOURCE("source"),
+	INTER("intermediate"),
+	SINK("sink"),
+	SINKLYON("sinkLyon"),
+	SINKVILL("sinkVilleurbanne"),
+	SINKVLX("sinkVaulx");
 	
 
 	private String name = "";

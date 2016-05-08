@@ -11,7 +11,6 @@ import org.apache.storm.shade.com.google.common.collect.Maps;
 import backtype.storm.Config;
 import backtype.storm.StormSubmitter;
 import backtype.storm.topology.TopologyBuilder;
-import stormBench.stormBench.metric.JdbcConsumer;
 import stormBench.stormBench.operator.bolt.HookableJdbcInsertBolt;
 import stormBench.stormBench.operator.bolt.LinearHeatwaveBolt;
 import stormBench.stormBench.operator.spout.ElementSpout;
@@ -20,7 +19,7 @@ import stormBench.stormBench.utils.XmlTopologyConfigParser;
 
 public class LinearTopology {
 
-	protected static final String LINEAR_TABLE = "lineartopology";
+	protected static final String LINEAR_TABLE = "results_linear";
 	protected static final String JDBC_CONF = "jdbc.conf";
 	
 	public static void main(String[] args) throws Exception {
@@ -46,6 +45,9 @@ public class LinearTopology {
     	/**
     	 * Declaration of source and sink components
     	 */
+    	
+    	ElementSpout spout = new ElementSpout(sgHost, sgPort, dbHost);
+    	
         ConnectionProvider connectionProvider = new HikariCPConnectionProvider(map);
         connectionProvider.prepare();
 
@@ -54,30 +56,28 @@ public class LinearTopology {
         		.withTableName(LINEAR_TABLE)
         		.withQueryTimeoutSecs(30);
         
-        ElementSpout spout = new ElementSpout(sgHost, sgPort, dbHost);
-        
         /**
          * Declaration of the linear topology
          */
         TopologyBuilder builder = new TopologyBuilder();
         
-        builder.setSpout("source", spout, nbExecutors).setNumTasks(nbTasks);
+        builder.setSpout(FieldNames.SOURCE.toString(), spout, nbExecutors).setNumTasks(nbTasks);
         
-        builder.setBolt("intermediate", new LinearHeatwaveBolt(dbHost), nbExecutors).setNumTasks(nbTasks)
-        .shuffleGrouping("source", FieldNames.LYON.toString())
-        .shuffleGrouping("source", FieldNames.VILLEUR.toString())
-        .shuffleGrouping("source", FieldNames.VAULX.toString());
+        builder.setBolt(FieldNames.INTER.toString(), new LinearHeatwaveBolt(dbHost), nbExecutors).setNumTasks(nbTasks)
+        .shuffleGrouping(FieldNames.SOURCE.toString(), FieldNames.LYON.toString())
+        .shuffleGrouping(FieldNames.SOURCE.toString(), FieldNames.VILLEUR.toString())
+        .shuffleGrouping(FieldNames.SOURCE.toString(), FieldNames.VAULX.toString());
         		
-        builder.setBolt("sink", PersistanceBolt, nbExecutors).setNumTasks(nbTasks)
-        .shuffleGrouping("intermediate", FieldNames.LYON.toString())
-        .shuffleGrouping("intermediate", FieldNames.VILLEUR.toString())
-        .shuffleGrouping("intermediate", FieldNames.VAULX.toString());
+        builder.setBolt(FieldNames.SINK.toString(), PersistanceBolt, nbExecutors).setNumTasks(nbTasks)
+        .shuffleGrouping(FieldNames.INTER.toString(), FieldNames.LYON.toString())
+        .shuffleGrouping(FieldNames.INTER.toString(), FieldNames.VILLEUR.toString())
+        .shuffleGrouping(FieldNames.INTER.toString(), FieldNames.VAULX.toString());
         
         /**
          * Configuration of metadata of the topology
          */
         Config config = new Config();
-        config.registerMetricsConsumer(JdbcConsumer.class);
+        config.setNumAckers(8);
         config.put(JDBC_CONF, map);
 		
 		/**

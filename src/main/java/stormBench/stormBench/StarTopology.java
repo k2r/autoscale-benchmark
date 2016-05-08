@@ -19,7 +19,7 @@ import stormBench.stormBench.utils.XmlTopologyConfigParser;
 
 public class StarTopology {
 	
-	protected static final String STAR_TABLE = "startopology";
+	protected static final String STAR_TABLE = "results_star";
 	protected static final String JDBC_CONF = "jdbc.conf";
 	
 	public static void main(String[] args) throws Exception {
@@ -82,6 +82,7 @@ public class StarTopology {
          * Configuration of metadata of the topology
          */
         Config config = new Config();
+        config.setNumAckers(8);
         config.put(JDBC_CONF, map);
 		
 		/**
