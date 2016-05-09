@@ -339,11 +339,7 @@ public class BenchHook extends BaseTaskHook implements Serializable {
 	
 	public void reset(){
 		BenchHook.lastTimestamp = BenchHook.currentTimestamp;
-		this.queues = new HashMap<>();
-		this.execTimes = new HashMap<>();
-		this.completeLatencies = new HashMap<>();
-		this.throughput = new HashMap<>();
-		this.failedTuples = new HashMap<>();
+		init();
 		for(Integer regTaskId : this.operatorTaskIds){
 			createMonitor(regTaskId);
 		}
