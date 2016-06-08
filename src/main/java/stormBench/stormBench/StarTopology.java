@@ -49,7 +49,7 @@ public class StarTopology {
         connectionProvider.prepare();
 
         JdbcMapper jdbcMapperBench = new SimpleJdbcMapper(STAR_TABLE, connectionProvider);
-        HookableJdbcInsertBolt PersistanceBolt = new HookableJdbcInsertBolt(connectionProvider, jdbcMapperBench, dbHost)
+        HookableJdbcInsertBolt PersistanceBolt = new HookableJdbcInsertBolt(connectionProvider, jdbcMapperBench)
         		.withTableName(STAR_TABLE)
         		.withQueryTimeoutSecs(30);
         
@@ -58,13 +58,13 @@ public class StarTopology {
          */
         TopologyBuilder builder = new TopologyBuilder();
         
-        builder.setSpout(FieldNames.LYON.toString(), new StarElementSpout(sgHost, sgPort, FieldNames.LYON.toString(), dbHost), nbExecutors).setNumTasks(nbTasks);
+        builder.setSpout(FieldNames.LYON.toString(), new StarElementSpout(sgHost, sgPort, FieldNames.LYON.toString()), nbExecutors).setNumTasks(nbTasks);
         
-        builder.setSpout(FieldNames.VILLEUR.toString(), new StarElementSpout(sgHost, sgPort, FieldNames.VILLEUR.toString(), dbHost), nbExecutors).setNumTasks(nbTasks);
+        builder.setSpout(FieldNames.VILLEUR.toString(), new StarElementSpout(sgHost, sgPort, FieldNames.VILLEUR.toString()), nbExecutors).setNumTasks(nbTasks);
         
-        builder.setSpout(FieldNames.VAULX.toString(), new StarElementSpout(sgHost, sgPort, FieldNames.VAULX.toString(), dbHost), nbExecutors).setNumTasks(nbTasks);
+        builder.setSpout(FieldNames.VAULX.toString(), new StarElementSpout(sgHost, sgPort, FieldNames.VAULX.toString()), nbExecutors).setNumTasks(nbTasks);
         
-        builder.setBolt("intermediate", new StarHeatwaveBolt(dbHost), nbExecutors).setNumTasks(nbTasks)
+        builder.setBolt("intermediate", new StarHeatwaveBolt(), nbExecutors).setNumTasks(nbTasks)
         .shuffleGrouping(FieldNames.LYON.toString(), FieldNames.LYON.toString())
         .shuffleGrouping(FieldNames.VILLEUR.toString(), FieldNames.VILLEUR.toString())
         .shuffleGrouping(FieldNames.VAULX.toString(), FieldNames.VAULX.toString());

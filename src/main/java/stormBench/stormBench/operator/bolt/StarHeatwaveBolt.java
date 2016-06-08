@@ -1,6 +1,5 @@
 package stormBench.stormBench.operator.bolt;
 
-import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Logger;
@@ -12,7 +11,6 @@ import backtype.storm.topology.OutputFieldsDeclarer;
 import backtype.storm.tuple.Fields;
 import backtype.storm.tuple.Tuple;
 import backtype.storm.tuple.Values;
-import stormBench.stormBench.hook.BenchHook;
 import stormBench.stormBench.utils.FieldNames;
 
 public class StarHeatwaveBolt implements IRichBolt{
@@ -23,7 +21,6 @@ public class StarHeatwaveBolt implements IRichBolt{
 	private static final long serialVersionUID = 2316929064298169656L;
 	private static Logger logger = Logger.getLogger("StarHeatwaveBolt");
 	private OutputCollector collector;
-	private String dbHost;
 	
 	private static final String city = "city";
 	private static final String refValue = "refValue";
@@ -57,11 +54,6 @@ public class StarHeatwaveBolt implements IRichBolt{
 		this.vaulx.put(zipCode, "69120");
 		this.vaulx.put(latitude, "45.788227");
 		this.vaulx.put(longitude, "4.928159");
-	}
-	
-	public StarHeatwaveBolt(String dbHost){
-		this();
-		this.dbHost = dbHost;
 	}
 	
 	/* (non-Javadoc)
@@ -131,12 +123,5 @@ public class StarHeatwaveBolt implements IRichBolt{
 	@SuppressWarnings("rawtypes")
 	public void prepare(Map arg0, TopologyContext context, OutputCollector collector) {
 		this.collector = collector;
-		try {
-			context.addTaskHook(new BenchHook(this.dbHost));
-		} catch (ClassNotFoundException e) {
-			logger.warning("Hook can not be attached to ElementSpout " + StarHeatwaveBolt.serialVersionUID + " because the JDBC driver can not be found, error: " + e );
-		} catch (SQLException e) {
-			logger.warning("Hook can not be attached to ElementSpout " + StarHeatwaveBolt.serialVersionUID + " because of invalid JDBC configuration , error: " + e);
-		}
 	}
 }

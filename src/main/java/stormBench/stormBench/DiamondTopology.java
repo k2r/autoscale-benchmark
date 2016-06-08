@@ -56,11 +56,11 @@ public class DiamondTopology {
         connectionProvider.prepare();
 
         JdbcMapper jdbcMapperBench = new SimpleJdbcMapper(DIAMOND_TABLE, connectionProvider);
-        HookableJdbcInsertBolt PersistanceBolt = new HookableJdbcInsertBolt(connectionProvider, jdbcMapperBench, dbHost)
+        HookableJdbcInsertBolt PersistanceBolt = new HookableJdbcInsertBolt(connectionProvider, jdbcMapperBench)
         		.withTableName(DIAMOND_TABLE)
         		.withQueryTimeoutSecs(30);
         
-        ElementSpout spout = new ElementSpout(sgHost, sgPort, dbHost);
+        ElementSpout spout = new ElementSpout(sgHost, sgPort);
         
         /**
          * Declaration of the diamond topology
@@ -69,13 +69,13 @@ public class DiamondTopology {
         
         builder.setSpout("source", spout, nbExecutors).setNumTasks(nbTasks);
         
-        builder.setBolt(FieldNames.LYON.toString(), new DiamondHeatwaveBolt(FieldNames.LYON.toString(), 28, dbHost), nbExecutors).setNumTasks(nbTasks)
+        builder.setBolt(FieldNames.LYON.toString(), new DiamondHeatwaveBolt(FieldNames.LYON.toString(), 28), nbExecutors).setNumTasks(nbTasks)
         .shuffleGrouping("source", FieldNames.LYON.toString());
         
-        builder.setBolt(FieldNames.VILLEUR.toString(), new DiamondHeatwaveBolt(FieldNames.VILLEUR.toString(), 30, dbHost), nbExecutors).setNumTasks(nbTasks)
+        builder.setBolt(FieldNames.VILLEUR.toString(), new DiamondHeatwaveBolt(FieldNames.VILLEUR.toString(), 30), nbExecutors).setNumTasks(nbTasks)
         .shuffleGrouping("source", FieldNames.VILLEUR.toString());
         
-        builder.setBolt(FieldNames.VAULX.toString(), new DiamondHeatwaveBolt(FieldNames.VAULX.toString(), 26, dbHost), nbExecutors).setNumTasks(nbTasks)
+        builder.setBolt(FieldNames.VAULX.toString(), new DiamondHeatwaveBolt(FieldNames.VAULX.toString(), 26), nbExecutors).setNumTasks(nbTasks)
         .shuffleGrouping("source", FieldNames.VAULX.toString());
         
         builder.setBolt("sink", PersistanceBolt, nbExecutors).setNumTasks(nbTasks)

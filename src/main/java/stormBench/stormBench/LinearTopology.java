@@ -46,13 +46,13 @@ public class LinearTopology {
     	 * Declaration of source and sink components
     	 */
     	
-    	ElementSpout spout = new ElementSpout(sgHost, sgPort, dbHost);
+    	ElementSpout spout = new ElementSpout(sgHost, sgPort);
     	
         ConnectionProvider connectionProvider = new HikariCPConnectionProvider(map);
         connectionProvider.prepare();
 
         JdbcMapper jdbcMapperBench = new SimpleJdbcMapper(LINEAR_TABLE, connectionProvider);
-        HookableJdbcInsertBolt PersistanceBolt = new HookableJdbcInsertBolt(connectionProvider, jdbcMapperBench, dbHost)
+        HookableJdbcInsertBolt PersistanceBolt = new HookableJdbcInsertBolt(connectionProvider, jdbcMapperBench)
         		.withTableName(LINEAR_TABLE)
         		.withQueryTimeoutSecs(30);
         
@@ -63,7 +63,7 @@ public class LinearTopology {
         
         builder.setSpout(FieldNames.SOURCE.toString(), spout, nbExecutors).setNumTasks(nbTasks);
         
-        builder.setBolt(FieldNames.INTER.toString(), new LinearHeatwaveBolt(dbHost), nbExecutors).setNumTasks(nbTasks)
+        builder.setBolt(FieldNames.INTER.toString(), new LinearHeatwaveBolt(), nbExecutors).setNumTasks(nbTasks)
         .shuffleGrouping(FieldNames.SOURCE.toString(), FieldNames.LYON.toString())
         .shuffleGrouping(FieldNames.SOURCE.toString(), FieldNames.VILLEUR.toString())
         .shuffleGrouping(FieldNames.SOURCE.toString(), FieldNames.VAULX.toString());

@@ -105,6 +105,7 @@ public class BenchHook extends BaseTaskHook implements Serializable {
 	 */
 	@Override
 	public void emit(EmitInfo info) {
+		
 		BenchHook.currentTimestamp = System.currentTimeMillis();
 		if(this.isResettable()){
 			this.persistMonitor();

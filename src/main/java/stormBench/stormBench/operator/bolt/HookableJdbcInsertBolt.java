@@ -3,7 +3,6 @@
  */
 package stormBench.stormBench.operator.bolt;
 
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -19,7 +18,6 @@ import backtype.storm.task.OutputCollector;
 import backtype.storm.task.TopologyContext;
 import backtype.storm.topology.OutputFieldsDeclarer;
 import backtype.storm.tuple.Tuple;
-import stormBench.stormBench.hook.BenchHook;
 
 /**
  * @author Roland
@@ -31,10 +29,10 @@ public class HookableJdbcInsertBolt extends AbstractJdbcBolt {
 	 * 
 	 */
 	private static final long serialVersionUID = -3844744366187783414L;
+	@SuppressWarnings("unused")
 	private static Logger logger = Logger.getLogger("HookableJdbcInsertolt");
 	
 	private JdbcMapper jdbcMapper;
-	private String dbHost;
 	private String tableName;
 	private String insertQuery;
 	
@@ -42,10 +40,9 @@ public class HookableJdbcInsertBolt extends AbstractJdbcBolt {
 	 * @param connectionProvider
 	 * @param jdbcMapper
 	 */
-	public HookableJdbcInsertBolt(ConnectionProvider connectionProvider, JdbcMapper jdbcMapper, String dbHost) {
+	public HookableJdbcInsertBolt(ConnectionProvider connectionProvider, JdbcMapper jdbcMapper) {
 		super(connectionProvider);
 		this.jdbcMapper = jdbcMapper;
-		this.dbHost = dbHost;
 	}
 	
 	public HookableJdbcInsertBolt withTableName(String tableName) {
@@ -67,13 +64,6 @@ public class HookableJdbcInsertBolt extends AbstractJdbcBolt {
 	@Override
 	public void prepare(Map arg0, TopologyContext context, OutputCollector collector){
 		super.prepare(arg0, context, collector);
-		try {
-			context.addTaskHook(new BenchHook(this.dbHost));
-		} catch (ClassNotFoundException e) {
-			logger.warning("Hook can not be attached to HookableJdbcInsertBolt " + HookableJdbcInsertBolt.serialVersionUID + " because the JDBC driver can not be found, error: " + e );
-		} catch (SQLException e) {
-			logger.warning("Hook can not be attached to HookableJdbcInsertBolt " + HookableJdbcInsertBolt.serialVersionUID + " because of invalid JDBC configuration , error: " + e);
-		}
 	}
 	
 	@SuppressWarnings("rawtypes")
