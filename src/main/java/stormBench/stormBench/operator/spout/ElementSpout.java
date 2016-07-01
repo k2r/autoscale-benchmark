@@ -133,6 +133,7 @@ public class ElementSpout implements IRichSpout {
 	@SuppressWarnings("rawtypes")
 	@Override
 	public void nextTuple() {
+		//TODO change here the distribution method in order to add a queue which add incoming tuples but send only one at a time
 		IElement[] input = this.getInputStream();
 		int nbElements = input.length;
 		if(nbElements > 0){
