@@ -6,6 +6,7 @@ package stormBench.stormBench.operator.spout;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Logger;
 
@@ -34,8 +35,10 @@ public class ElementSpout implements IRichSpout {
 	private static Logger logger = Logger.getLogger("ElementSpoutLogger");
 	private String host;
 	private int port;
+	private HashMap<Integer, IElement> inputQueue;
+	private Integer sendIndex;
+	private Integer receiveIndex;
 	private SpoutOutputCollector collector;
-	private int msgId;
 	
 	/**
 	 * 
@@ -43,6 +46,9 @@ public class ElementSpout implements IRichSpout {
 	public ElementSpout(String host, int port) {
 		this.host = host;
 		this.port = port;
+		this.inputQueue = new HashMap<>();
+		this.sendIndex = 0;
+		this.receiveIndex = 0;
 	}
 	
 	/**
@@ -100,7 +106,6 @@ public class ElementSpout implements IRichSpout {
 	@Override
 	public void open(Map conf, TopologyContext context, SpoutOutputCollector collector) {
 		this.collector = collector;
-		this.msgId = 0;
 	}
 
 	/* (non-Javadoc)
@@ -133,33 +138,36 @@ public class ElementSpout implements IRichSpout {
 	@SuppressWarnings("rawtypes")
 	@Override
 	public void nextTuple() {
-		//TODO change here the distribution method in order to add a queue which add incoming tuples but send only one at a time
 		IElement[] input = this.getInputStream();
 		int nbElements = input.length;
 		if(nbElements > 0){
 			for(int i = 0; i < nbElements; i++){
-				IElement2 element = (IElement2) input[i];
-				Integer temperature = (Integer) element.getFirstValue();
-				Integer code = (Integer) element.getSecondValue();
-				String streamId = null;
-				switch(code){
-				case(1): 	streamId = FieldNames.LYON.toString();
-				break;
-				case(2): 	streamId = FieldNames.VILLEUR.toString();
-				break;
-				case(3):	streamId = FieldNames.VAULX.toString();
-				break;
-				}
-				this.collector.emit(streamId, new Values(temperature), this.msgId);
-				this.msgId++;
+				this.inputQueue.put(receiveIndex, input[i]);
+				receiveIndex++;
 			}
-			return;
 		}else{
 			try {
 				Thread.sleep(1);
 			} catch (InterruptedException e) {
 				logger.severe("ElementSpout can not sleep because of " + e);
 			}
+		}
+		if(this.receiveIndex > this.sendIndex){
+			IElement2 element = (IElement2) this.inputQueue.get(this.sendIndex);
+			Integer temperature = (Integer) element.getFirstValue();
+			Integer code = (Integer) element.getSecondValue();
+			String streamId = null;
+			switch(code){
+			case(1): 	streamId = FieldNames.LYON.toString();
+			break;
+			case(2): 	streamId = FieldNames.VILLEUR.toString();
+			break;
+			case(3):	streamId = FieldNames.VAULX.toString();
+			break;
+			}
+			this.collector.emit(streamId, new Values(temperature), this.sendIndex);
+			this.sendIndex++;
+			logger.info("ElementSpout info, tuples received: " + receiveIndex + ", tuples transmitted: " + sendIndex);
 		}
 	}
 
@@ -169,16 +177,31 @@ public class ElementSpout implements IRichSpout {
 	@Override
 	public void ack(Object msgId) {
 		Integer id  = (Integer) msgId;
+		this.inputQueue.remove(id);
 		ElementSpout.logger.fine("ElementSpout " + ElementSpout.serialVersionUID + " acked tuple " + id + ".");
 	}
 
 	/* (non-Javadoc)
 	 * @see backtype.storm.spout.ISpout#fail(java.lang.Object)
 	 */
+	@SuppressWarnings("rawtypes")
 	@Override
 	public void fail(Object msgId) {
 		Integer id  = (Integer) msgId;
-		ElementSpout.logger.fine("ElementSpout " + ElementSpout.serialVersionUID + " failed tuple " + id + ".");
+		IElement2 element = (IElement2) this.inputQueue.get(id);
+		Integer temperature = (Integer) element.getFirstValue();
+		Integer code = (Integer) element.getSecondValue();
+		String streamId = null;
+		switch(code){
+		case(1): 	streamId = FieldNames.LYON.toString();
+		break;
+		case(2): 	streamId = FieldNames.VILLEUR.toString();
+		break;
+		case(3):	streamId = FieldNames.VAULX.toString();
+		break;
+		}
+		this.collector.emit(streamId, new Values(temperature), id);
+		ElementSpout.logger.fine("ElementSpout " + ElementSpout.serialVersionUID + " failed tuple " + id + ". It has been sent again.");
 	}
 
 	/* (non-Javadoc)
