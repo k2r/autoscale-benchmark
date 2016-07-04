@@ -73,8 +73,7 @@ public class ElementSpout implements IRichSpout {
             	}
             }
 		}catch(Exception e){
-			ElementSpout.logger.severe("Client exception: " + e.toString());
-			e.printStackTrace();
+			logger.severe("Client exception: " + e.toString());
 		}
 		return input;
 	}
@@ -93,8 +92,7 @@ public class ElementSpout implements IRichSpout {
 				registry.unbind("tuples");
             }
 		}catch(Exception e){
-			ElementSpout.logger.severe("Client exception: " + e.toString());
-			e.printStackTrace();
+			logger.severe("Client exception: " + e.toString());
 		}
 		return input;
 	}
@@ -113,7 +111,7 @@ public class ElementSpout implements IRichSpout {
 	 */
 	@Override
 	public void close() {
-		ElementSpout.logger.info("ElementSpout " + ElementSpout.serialVersionUID + " is being closed.");
+		logger.info("ElementSpout " + ElementSpout.serialVersionUID + " is being closed.");
 	}
 
 	/* (non-Javadoc)
@@ -121,7 +119,7 @@ public class ElementSpout implements IRichSpout {
 	 */
 	@Override
 	public void activate() {
-		ElementSpout.logger.info("ElementSpout " + ElementSpout.serialVersionUID + " is being activated.");
+		logger.info("ElementSpout " + ElementSpout.serialVersionUID + " is being activated.");
 	}
 
 	/* (non-Javadoc)
@@ -129,7 +127,7 @@ public class ElementSpout implements IRichSpout {
 	 */
 	@Override
 	public void deactivate() {
-		ElementSpout.logger.info("ElementSpout " + ElementSpout.serialVersionUID + " is being deactivated.");
+		logger.info("ElementSpout " + ElementSpout.serialVersionUID + " is being deactivated.");
 	}
 
 	/* (non-Javadoc)
@@ -167,7 +165,7 @@ public class ElementSpout implements IRichSpout {
 			}
 			this.collector.emit(streamId, new Values(temperature), this.sendIndex);
 			this.sendIndex++;
-			logger.info("ElementSpout info, tuples received: " + receiveIndex + ", tuples transmitted: " + sendIndex);
+			logger.info("ElementSpout info, tuples received: " + receiveIndex + ", tuples pending: " + this.inputQueue.size() + ", tuples transmitted: " + sendIndex);
 		}
 	}
 
@@ -178,7 +176,7 @@ public class ElementSpout implements IRichSpout {
 	public void ack(Object msgId) {
 		Integer id  = (Integer) msgId;
 		this.inputQueue.remove(id);
-		ElementSpout.logger.fine("ElementSpout " + ElementSpout.serialVersionUID + " acked tuple " + id + ".");
+		logger.fine("ElementSpout " + ElementSpout.serialVersionUID + " acked tuple " + id + ".");
 	}
 
 	/* (non-Javadoc)
@@ -201,7 +199,7 @@ public class ElementSpout implements IRichSpout {
 		break;
 		}
 		this.collector.emit(streamId, new Values(temperature), id);
-		ElementSpout.logger.fine("ElementSpout " + ElementSpout.serialVersionUID + " failed tuple " + id + ". It has been sent again.");
+		logger.fine("ElementSpout " + ElementSpout.serialVersionUID + " failed tuple " + id + ". It has been sent again.");
 	}
 
 	/* (non-Javadoc)

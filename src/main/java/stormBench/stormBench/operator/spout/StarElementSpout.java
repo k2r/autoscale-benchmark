@@ -3,6 +3,7 @@ package stormBench.stormBench.operator.spout;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Logger;
 
@@ -27,8 +28,10 @@ public class StarElementSpout implements IRichSpout{
 	private String host;
 	private int port;
 	private String city;
+	private HashMap<Integer, IElement> inputQueue;
+	private Integer sendIndex;
+	private Integer receiveIndex;
 	private SpoutOutputCollector collector;
-	private int msgId;
 
 	/**
 	 * 
@@ -37,6 +40,9 @@ public class StarElementSpout implements IRichSpout{
 		this.host = host;
 		this.port = port;
 		this.city = city;
+		this.inputQueue = new HashMap<>();
+		this.sendIndex = 0;
+		this.receiveIndex = 0;
 	}
 	
 	/**
@@ -45,15 +51,23 @@ public class StarElementSpout implements IRichSpout{
 	 * @return the last set of tuples sent by the stream source
 	 */
 	public IElement[] getInputStream(){
-		IElement[] input = null;
+		IElement[] input = new IElement[0];
 		try {
-            Registry registry = LocateRegistry.getRegistry(host, port);
-            if(registry != null){
-            	IRMIStreamSource stub = (IRMIStreamSource) registry.lookup("tuples");
-				input = stub.getInputStream();
-            }
+			Registry registry = LocateRegistry.getRegistry(host, port);
+			if(registry != null){
+				String[] resources = registry.list();
+				int n = resources.length;
+				for(int i = 0; i < n; i++){
+					if(resources[i].equalsIgnoreCase("tuples")){
+						IRMIStreamSource stub = (IRMIStreamSource) registry.lookup("tuples");
+						input = stub.getInputStream();
+						registry.unbind("tuples");
+						break;
+					}
+				}
+			}
 		}catch(Exception e){
-			StarElementSpout.logger.severe("Client exception: " + e.toString());
+			logger.severe("Client exception: " + e.toString());
 			e.printStackTrace();
 		}
 		return input;
@@ -70,9 +84,10 @@ public class StarElementSpout implements IRichSpout{
             if(registry != null){
             	IRMIStreamSource stub = (IRMIStreamSource) registry.lookup("tuples");
 				input = stub.getAttrNames();
+				registry.unbind("tuples");
             }
 		}catch(Exception e){
-			StarElementSpout.logger.severe("Client exception: " + e.toString());
+			logger.severe("Client exception: " + e.toString());
 			e.printStackTrace();
 		}
 		return input;
@@ -85,7 +100,6 @@ public class StarElementSpout implements IRichSpout{
 	@Override
 	public void open(Map conf, TopologyContext context, SpoutOutputCollector collector) {
 		this.collector = collector;
-		this.msgId = 0;
 	}
 
 	/* (non-Javadoc)
@@ -120,22 +134,35 @@ public class StarElementSpout implements IRichSpout{
 	public void nextTuple() {
 		IElement[] input = this.getInputStream();
 		int nbElements = input.length;
-		for(int i = 0; i < nbElements; i++){
-			IElement2 element = (IElement2) input[i];
+		if(nbElements > 0){
+			for(int i = 0; i < nbElements; i++){
+				this.inputQueue.put(receiveIndex, input[i]);
+				receiveIndex++;
+			}
+		}else{
+			try {
+				Thread.sleep(1);
+			} catch (InterruptedException e) {
+				logger.severe("ElementSpout can not sleep because of " + e);
+			}
+		}
+		if(this.receiveIndex > this.sendIndex){
+			IElement2 element = (IElement2) this.inputQueue.get(this.sendIndex);
 			Integer temperature = (Integer) element.getFirstValue();
 			Integer code = (Integer) element.getSecondValue();
 			String streamId = null;
 			switch(code){
 			case(1): 	streamId = FieldNames.LYON.toString();
-						break;
+			break;
 			case(2): 	streamId = FieldNames.VILLEUR.toString();
-						break;
+			break;
 			case(3):	streamId = FieldNames.VAULX.toString();
-						break;
+			break;
 			}
 			if(streamId.equalsIgnoreCase(this.city)){
-				this.collector.emit(streamId, new Values(temperature), this.msgId);
-				this.msgId++;
+				this.collector.emit(streamId, new Values(temperature), this.sendIndex);
+				this.sendIndex++;
+				logger.info("ElementSpout info, tuples received: " + receiveIndex + ", tuples pending: " + this.inputQueue.size() + ", tuples transmitted: " + sendIndex);
 			}
 		}
 	}
@@ -146,16 +173,33 @@ public class StarElementSpout implements IRichSpout{
 	@Override
 	public void ack(Object msgId) {
 		Integer id  = (Integer) msgId;
-		StarElementSpout.logger.fine("StarElementSpout " + StarElementSpout.serialVersionUID + " acked tuple " + id + ".");
+		this.inputQueue.remove(id);
+		logger.fine("StarElementSpout " + StarElementSpout.serialVersionUID + " acked tuple " + id + ".");
 	}
 
 	/* (non-Javadoc)
 	 * @see backtype.storm.spout.ISpout#fail(java.lang.Object)
 	 */
+	@SuppressWarnings("rawtypes")
 	@Override
 	public void fail(Object msgId) {
 		Integer id  = (Integer) msgId;
-		StarElementSpout.logger.fine("StarElementSpout " + StarElementSpout.serialVersionUID + " failed tuple " + id + ".");
+		IElement2 element = (IElement2) this.inputQueue.get(id);
+		Integer temperature = (Integer) element.getFirstValue();
+		Integer code = (Integer) element.getSecondValue();
+		String streamId = null;
+		switch(code){
+		case(1): 	streamId = FieldNames.LYON.toString();
+		break;
+		case(2): 	streamId = FieldNames.VILLEUR.toString();
+		break;
+		case(3):	streamId = FieldNames.VAULX.toString();
+		break;
+		}
+		if(streamId.equalsIgnoreCase(this.city)){
+			this.collector.emit(streamId, new Values(temperature), id);
+			logger.fine("StarElementSpout " + StarElementSpout.serialVersionUID + " failed tuple " + id + ". It has been sent again.");
+		}
 	}
 
 	/* (non-Javadoc)
