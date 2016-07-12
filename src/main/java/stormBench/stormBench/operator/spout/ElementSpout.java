@@ -40,6 +40,7 @@ public class ElementSpout implements IRichSpout {
 	private Integer receiveIndex;
 	private SpoutOutputCollector collector;
 	
+	
 	/**
 	 * 
 	 */
@@ -165,7 +166,7 @@ public class ElementSpout implements IRichSpout {
 			}
 			this.collector.emit(streamId, new Values(temperature), this.sendIndex);
 			this.sendIndex++;
-			logger.info("ElementSpout info, tuples received: " + receiveIndex + ", tuples pending: " + this.inputQueue.size() + ", tuples transmitted: " + sendIndex);
+			//logger.info("ElementSpout info, tuples received: " + receiveIndex + ", tuples pending: " + this.inputQueue.size() + ", tuples transmitted: " + sendIndex);
 		}
 	}
 
