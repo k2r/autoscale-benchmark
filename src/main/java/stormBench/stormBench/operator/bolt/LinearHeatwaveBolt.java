@@ -93,9 +93,10 @@ public class LinearHeatwaveBolt implements IRichBolt {
 						Double.parseDouble(this.lyon.get(latitude)), Double.parseDouble(this.lyon.get(longitude)),
 						temperature));
 				collector.ack(arg0);
+				return;
 			}else{
 				collector.ack(arg0);
-
+				return;
 			}
 		}
 		if(streamId.equalsIgnoreCase(FieldNames.VILLEUR.toString())){
@@ -104,8 +105,10 @@ public class LinearHeatwaveBolt implements IRichBolt {
 						Double.parseDouble(this.villeurbanne.get(latitude)), Double.parseDouble(this.villeurbanne.get(longitude)),
 						temperature));
 				collector.ack(arg0);
+				return;
 			}else{
 				collector.ack(arg0);
+				return;
 			}
 		}
 		if(streamId.equalsIgnoreCase(FieldNames.VAULX.toString())){
@@ -114,8 +117,10 @@ public class LinearHeatwaveBolt implements IRichBolt {
 						Double.parseDouble(this.vaulx.get(latitude)), Double.parseDouble(this.vaulx.get(longitude)),
 						temperature));
 				collector.ack(arg0);
+				return;
 			}else{
 				collector.ack(arg0);
+				return;
 			}
 		}
 	}
