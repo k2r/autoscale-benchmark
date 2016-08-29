@@ -38,7 +38,6 @@ public class ElementSpout implements IRichSpout {
 	private HashMap<Integer, IElement> inputQueue;
 	private Integer sendIndex;
 	private Integer receiveIndex;
-	private int chunkCounter;
 	private SpoutOutputCollector collector;
 	
 	
@@ -51,7 +50,6 @@ public class ElementSpout implements IRichSpout {
 		this.inputQueue = new HashMap<>();
 		this.sendIndex = 0;
 		this.receiveIndex = 0;
-		this.chunkCounter = 0;
 	}
 	
 	/**
@@ -62,28 +60,22 @@ public class ElementSpout implements IRichSpout {
 	public IElement[] getInputStream(){
 		IElement[] input = new IElement[0];
 		try {
-            Registry registry = LocateRegistry.getRegistry(host, port);
-            if(registry != null){
-            	for(int j = 0; j < 1000; j++){
-            		this.chunkCounter = j;
-
-            		String[] resources = registry.list();
-            		int n = resources.length;
-            		for(int i = 0; i < n; i++){
-            			if(resources[i].equalsIgnoreCase("chunk" + this.chunkCounter)){
-            				IRMIStreamSource stub = (IRMIStreamSource) registry.lookup("chunk" + this.chunkCounter);
-            				input = stub.getInputStream();
-            				registry.unbind("chunk" + this.chunkCounter);
-            				break;
-            			}
-            		}
-            		if(input.length > 0){
-            			break;
-            		}
-            	}
-            }
+			Registry registry = LocateRegistry.getRegistry(host, port);
+			if(registry != null){
+				String[] resources = registry.list();
+				int n = resources.length;
+				for(int i = 0; i < n; i++){
+					if(resources[i].equalsIgnoreCase("tuples")){
+						IRMIStreamSource stub = (IRMIStreamSource) registry.lookup("tuples");
+						input = stub.getInputStream();
+						registry.unbind("tuples");
+						break;
+					}
+				}
+			}
 		}catch(Exception e){
 			logger.severe("Client exception: " + e.toString());
+			e.printStackTrace();
 		}
 		return input;
 	}
