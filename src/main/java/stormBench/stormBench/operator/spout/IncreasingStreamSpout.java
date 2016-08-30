@@ -88,13 +88,13 @@ public class IncreasingStreamSpout implements IRichSpout {
 	 */
 	@Override
 	public void nextTuple() {
-		if(this.index < 100000){
+		if(this.index < 500000){
 			String streamId = generateTuple();
 			this.collector.emit(streamId, new Values(35), this.index);
 			this.index++;
 		}
 		try {
-			int sleepTime = 10 - (this.index / 10000);
+			int sleepTime = Math.max(100 - (this.index / 50), 1);
 			Thread.sleep(sleepTime);
 		} catch (InterruptedException e) {
 			logger.fine("Unable to sleep the spout because " + e);
