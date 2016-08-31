@@ -1,13 +1,17 @@
+stormBench\stormBench\zookeeper\ZookeeperClient.class
 stormBench\stormBench\operator\bolt\HookableJdbcInsertBolt.class
 stormBench\stormBench\utils\XmlTopologyConfigParser.class
+stormBench\stormBench\zookeeper\WatcherImpl.class
 stormBench\stormBench\operator\spout\StarElementSpout.class
 stormBench\stormBench\operator\bolt\LinearHeatwaveBolt.class
+stormBench\stormBench\utils\IRMIStateInfo.class
 stormBench\stormBench\utils\FieldNames.class
 stormBench\stormBench\LinearTopology.class
 stormBench\stormBench\operator\spout\ElementSpout.class
 stormBench\stormBench\operator\spout\IncreasingStreamSpout.class
 stormBench\stormBench\operator\bolt\StarHeatwaveBolt.class
 stormBench\stormBench\operator\bolt\DiamondHeatwaveBolt.class
+stormBench\stormBench\utils\RMIStateInfo.class
 stormBench\stormBench\DiamondTopology.class
 stormBench\stormBench\StarTopology.class
 stormBench\stormBench\operator\bolt\SleepBolt.class

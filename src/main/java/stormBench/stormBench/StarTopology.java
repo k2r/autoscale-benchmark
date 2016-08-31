@@ -35,7 +35,7 @@ public class StarTopology {
 		int sgPort = Integer.parseInt(parameters.getSgPort());
 		int nbTasks = Integer.parseInt(parameters.getNbTasks());
 		int nbExecutors = Integer.parseInt(parameters.getNbExecutors());
-		String dbHost = parameters.getDbHost();
+		String dbHost = parameters.getStateHost();
 		
 		Map<String, Object> map = Maps.newHashMap();
     	map.put("dataSourceClassName", "com.mysql.jdbc.jdbc2.optional.MysqlDataSource");

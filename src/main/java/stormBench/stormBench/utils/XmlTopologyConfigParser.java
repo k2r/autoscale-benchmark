@@ -135,7 +135,7 @@ public class XmlTopologyConfigParser {
 		this.nbExecutors = nbExecutors;
 	}
 
-	public String getDbHost(){
+	public String getStateHost(){
 		return this.dbHost;
 	}
 	
@@ -184,7 +184,7 @@ public class XmlTopologyConfigParser {
 		this.setNbTasks(nbtasks.item(0).getTextContent());
 		final NodeList nbexecutors = parameters.getElementsByTagName(TopologyConfigNodeNames.NBEXECS.toString());
 		this.setNbExecutors(nbexecutors.item(0).getTextContent());
-		final NodeList dbhost = parameters.getElementsByTagName(TopologyConfigNodeNames.DBHOST.toString());
+		final NodeList dbhost = parameters.getElementsByTagName(TopologyConfigNodeNames.STATEHOST.toString());
 		this.setDbHost(dbhost.item(0).getTextContent());
 		final NodeList size = parameters.getElementsByTagName(TopologyConfigNodeNames.SIZE.toString());
 		this.setWindowSize(size.item(0).getTextContent());

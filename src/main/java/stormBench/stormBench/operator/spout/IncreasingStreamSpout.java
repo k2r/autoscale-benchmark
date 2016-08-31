@@ -3,6 +3,8 @@
  */
 package stormBench.stormBench.operator.spout;
 
+import java.io.UnsupportedEncodingException;
+import java.nio.charset.Charset;
 import java.util.Map;
 import java.util.Random;
 import java.util.logging.Logger;
@@ -14,6 +16,7 @@ import backtype.storm.topology.OutputFieldsDeclarer;
 import backtype.storm.tuple.Fields;
 import backtype.storm.tuple.Values;
 import stormBench.stormBench.utils.FieldNames;
+import stormBench.stormBench.zookeeper.ZookeeperClient;
 
 /**
  * @author Roland
@@ -30,8 +33,11 @@ public class IncreasingStreamSpout implements IRichSpout {
 	private SpoutOutputCollector collector;
 	private Random random;
 	private int index;
+	private String stateHost;
+	private ZookeeperClient zkClient;
 	
-	public IncreasingStreamSpout() {
+	public IncreasingStreamSpout(String stateHost) {
+		this.stateHost = stateHost;
 	}
 	
 	/* (non-Javadoc)
@@ -41,7 +47,25 @@ public class IncreasingStreamSpout implements IRichSpout {
 	@Override
 	public void open(Map conf, TopologyContext context, SpoutOutputCollector collector) {
 		this.collector = collector;
-		this.index = 0;
+		try {
+			if(this.zkClient != null){
+				byte[] rawState = this.zkClient.getState();
+				if(rawState != null){
+					Integer state = Integer.parseInt(new String(this.zkClient.getState(), Charset.defaultCharset().name()));
+					this.index = state;
+					//TODO Print something explicitly, logger does not seem to be considered
+					logger.info("Index " + this.index + "successfully retrieved from zNode");
+				}else{
+					this.index = 0;
+				}
+			}else{
+				this.zkClient = new ZookeeperClient(this.stateHost);
+				this.zkClient.createZNode();
+				this.index = 0;
+			}
+		} catch (NumberFormatException | UnsupportedEncodingException e) {
+			logger.severe("Unable to decode the current state");
+		}
 		this.random = new Random();
 	}
 
@@ -92,9 +116,11 @@ public class IncreasingStreamSpout implements IRichSpout {
 			String streamId = generateTuple();
 			this.collector.emit(streamId, new Values(35), this.index);
 			this.index++;
+			String state = this.index + "";
+			this.zkClient.persistState(state.getBytes());
 		}
 		try {
-			int sleepTime = Math.max(100 - (this.index / 50), 1);
+			int sleepTime = Math.max(100 - (this.index / 5), 1);
 			Thread.sleep(sleepTime);
 		} catch (InterruptedException e) {
 			logger.fine("Unable to sleep the spout because " + e);

@@ -20,6 +20,7 @@ public class LinearTopology {
 		XmlTopologyConfigParser parameters = new XmlTopologyConfigParser("topParameters.xml");
 		parameters.initParameters();
 		
+		String stateHost = parameters.getStateHost();
 		String topId = parameters.getTopId();
 		
 		int nbTasks = Integer.parseInt(parameters.getNbTasks());
@@ -30,7 +31,7 @@ public class LinearTopology {
     	 */
     	
     	//ElementSpout spout = new ElementSpout(parameters.getSgHost(), Integer.parseInt(parameters.getSgPort()));
-    	IncreasingStreamSpout spout = new IncreasingStreamSpout();
+    	IncreasingStreamSpout spout = new IncreasingStreamSpout(stateHost);
         /**
          * Declaration of the linear topology
          */
