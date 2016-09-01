@@ -22,13 +22,14 @@ public class ZookeeperClient {
 	private String host;
 	private ZooKeeper zookeeper;
 	private Watcher watcher;
-	private final String zNodeName = "/state";
+	private String zNodeName = "/TestTopologyState";
 	private byte[] state;
 	private static Logger logger = Logger.getLogger("ZookeeperClient");
 	
-	public ZookeeperClient(String host) {
+	public ZookeeperClient(String host, String id) {
 		this.host = host;
 		this.watcher = new WatcherImpl();
+		this.zNodeName = "/" + id + "State";
 		try {
 			this.zookeeper = new ZooKeeper(this.host, 20000, this.watcher);
 		} catch (IOException e) {
@@ -44,11 +45,21 @@ public class ZookeeperClient {
 		}
 	}
 	
+	public Stat existsZNode(){
+		Stat stat = null;
+		try {
+			stat = this.zookeeper.exists(this.zNodeName,  false);
+		} catch (KeeperException | InterruptedException e) {
+			logger.severe("Unable to check existence of zNode for state persistence because " + e);
+		}
+		return stat;
+	}
+	
 	public void createZNode(){
 		try {
-			Stat stat = this.zookeeper.exists(this.zNodeName, false);
+			Stat stat = this.existsZNode();
 			if(stat == null){
-				this.zookeeper.create(this.zNodeName, this.state, ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.EPHEMERAL);
+				this.zookeeper.create(this.zNodeName, this.state, ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT);
 			}
 		} catch (KeeperException | InterruptedException e) {
 			logger.severe("Unable to create the zNode on " + this.host + " because " + e);
@@ -58,7 +69,7 @@ public class ZookeeperClient {
 	public void persistState(byte[] state){
 		this.state = state;
 		try {
-			Stat stat = this.zookeeper.exists(this.zNodeName, false);
+			Stat stat = this.existsZNode();
 			if(stat != null){
 				this.zookeeper.setData(this.zNodeName, this.state, stat.getVersion());
 			}
@@ -70,7 +81,7 @@ public class ZookeeperClient {
 	public byte[] getState(){
 		byte[] result = null;
 		try {
-			Stat stat = this.zookeeper.exists(this.zNodeName, false);
+			Stat stat = existsZNode();
 			if(stat != null){
 				result = this.zookeeper.getData(this.zNodeName, false, stat);
 			}

@@ -5,8 +5,8 @@ package stormBench.stormBench.operator.spout;
 
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
+import java.util.HashMap;
 import java.util.Map;
-import java.util.Random;
 import java.util.logging.Logger;
 
 import backtype.storm.spout.SpoutOutputCollector;
@@ -31,10 +31,10 @@ public class IncreasingStreamSpout implements IRichSpout {
 	private static final long serialVersionUID = 2853429592252435680L;
 	private static Logger logger = Logger.getLogger("IncreasingStreamSpout");
 	private SpoutOutputCollector collector;
-	private Random random;
 	private int index;
 	private String stateHost;
 	private ZookeeperClient zkClient;
+	private HashMap<Integer, String> replayQueue;
 	
 	public IncreasingStreamSpout(String stateHost) {
 		this.stateHost = stateHost;
@@ -46,27 +46,27 @@ public class IncreasingStreamSpout implements IRichSpout {
 	@SuppressWarnings("rawtypes")
 	@Override
 	public void open(Map conf, TopologyContext context, SpoutOutputCollector collector) {
+		String id = context.getStormId();
 		this.collector = collector;
+		this.replayQueue = new HashMap<>();
+		this.zkClient = new ZookeeperClient(this.stateHost, id);
 		try {
-			if(this.zkClient != null){
+			if(this.zkClient.existsZNode() != null){
 				byte[] rawState = this.zkClient.getState();
 				if(rawState != null){
 					Integer state = Integer.parseInt(new String(this.zkClient.getState(), Charset.defaultCharset().name()));
 					this.index = state;
-					//TODO Print something explicitly, logger does not seem to be considered
-					logger.info("Index " + this.index + "successfully retrieved from zNode");
+					System.out.println("Index " + this.index + " successfully retrieved from zNode");
 				}else{
 					this.index = 0;
 				}
 			}else{
-				this.zkClient = new ZookeeperClient(this.stateHost);
 				this.zkClient.createZNode();
 				this.index = 0;
 			}
 		} catch (NumberFormatException | UnsupportedEncodingException e) {
 			logger.severe("Unable to decode the current state");
 		}
-		this.random = new Random();
 	}
 
 	/* (non-Javadoc)
@@ -94,14 +94,14 @@ public class IncreasingStreamSpout implements IRichSpout {
 	}
 
 	public String generateTuple(){
-		int code = this.random.nextInt(3) + 1;
+		int code = this.index % 3;
 		String streamId = "";
 		switch(code){
-		case(1): 	streamId = FieldNames.LYON.toString();
+		case(0): 	streamId = FieldNames.LYON.toString();
 		break;
-		case(2): 	streamId = FieldNames.VILLEUR.toString();
+		case(1): 	streamId = FieldNames.VILLEUR.toString();
 		break;
-		case(3):	streamId = FieldNames.VAULX.toString();
+		case(2):	streamId = FieldNames.VAULX.toString();
 		break;
 		}
 		return streamId;
@@ -112,18 +112,34 @@ public class IncreasingStreamSpout implements IRichSpout {
 	 */
 	@Override
 	public void nextTuple() {
-		if(this.index < 500000){
+		if(this.index < 15000){
 			String streamId = generateTuple();
 			this.collector.emit(streamId, new Values(35), this.index);
+			this.replayQueue.put(this.index, streamId);
 			this.index++;
 			String state = this.index + "";
 			this.zkClient.persistState(state.getBytes());
+		}else{
+			System.out.println("End of test stream!");
 		}
 		try {
-			int sleepTime = Math.max(100 - (this.index / 5), 1);
-			Thread.sleep(sleepTime);
+			if(this.index < 1000){
+				Thread.sleep(100);
+			}else{
+				if(this.index < 2000){
+					Thread.sleep(50);
+				}else{
+					if(this.index < 4000){
+						Thread.sleep(10);
+					}else{
+						if(this.index < 10000){
+							Thread.sleep(1);
+						}
+					}
+				}
+			}
 		} catch (InterruptedException e) {
-			logger.fine("Unable to sleep the spout because " + e);
+			logger.severe("Unable to sleep the spout because " + e);
 		}
 	}
 
@@ -132,6 +148,8 @@ public class IncreasingStreamSpout implements IRichSpout {
 	 */
 	@Override
 	public void ack(Object msgId) {
+		Integer id = (Integer) msgId;
+		this.replayQueue.remove(id);
 	}
 
 	/* (non-Javadoc)
@@ -139,6 +157,9 @@ public class IncreasingStreamSpout implements IRichSpout {
 	 */
 	@Override
 	public void fail(Object msgId) {
+		Integer id = (Integer) msgId;
+		String streamId = this.replayQueue.get(id);
+		this.collector.emit(streamId, new Values(35), id);
 	}
 	
 	/* (non-Javadoc)
