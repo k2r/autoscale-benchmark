@@ -84,7 +84,11 @@ public class LinearHeatwaveBolt implements IRichBolt {
 	 * @see backtype.storm.topology.IRichBolt#execute(backtype.storm.tuple.Tuple)
 	 */
 	public void execute(Tuple arg0) {
-
+		try {
+			Thread.sleep(5);
+		} catch (InterruptedException e) {
+			logger.severe("Intermediate bolt is unable to sleep because " + e);
+		}
 		int temperature = arg0.getIntegerByField(FieldNames.TEMPERATURE.toString());
 		String streamId = arg0.getSourceStreamId();
 		if(streamId.equalsIgnoreCase(FieldNames.LYON.toString())){

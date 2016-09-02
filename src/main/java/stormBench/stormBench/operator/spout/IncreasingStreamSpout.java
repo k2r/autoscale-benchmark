@@ -112,7 +112,7 @@ public class IncreasingStreamSpout implements IRichSpout {
 	 */
 	@Override
 	public void nextTuple() {
-		if(this.index < 15000){
+		if(this.index < 18000){
 			String streamId = generateTuple();
 			this.collector.emit(streamId, new Values(35), this.index);
 			this.replayQueue.put(this.index, streamId);
@@ -124,16 +124,24 @@ public class IncreasingStreamSpout implements IRichSpout {
 		}
 		try {
 			if(this.index < 1000){
-				Thread.sleep(100);
+				Thread.sleep(500);
 			}else{
 				if(this.index < 2000){
-					Thread.sleep(50);
+					Thread.sleep(250);
 				}else{
 					if(this.index < 4000){
-						Thread.sleep(10);
+						Thread.sleep(100);
 					}else{
-						if(this.index < 10000){
-							Thread.sleep(1);
+						if(this.index < 8000){
+							Thread.sleep(50);
+						}else{
+							if(this.index < 12000){
+								Thread.sleep(10);
+							}else{
+								if(this.index < 16000){
+									Thread.sleep(1);
+								}
+							}
 						}
 					}
 				}
