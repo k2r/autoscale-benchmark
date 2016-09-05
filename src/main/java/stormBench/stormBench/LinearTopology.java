@@ -44,7 +44,7 @@ public class LinearTopology {
         .shuffleGrouping(FieldNames.SOURCE.toString(), FieldNames.VILLEUR.toString())
         .shuffleGrouping(FieldNames.SOURCE.toString(), FieldNames.VAULX.toString());
         
-        builder.setBolt(FieldNames.SINK.toString(), new SleepBolt(20), nbExecutors).setNumTasks(nbTasks)
+        builder.setBolt(FieldNames.SINK.toString(), new SleepBolt(50), nbExecutors).setNumTasks(nbTasks)
         .shuffleGrouping(FieldNames.INTER.toString(), FieldNames.LYON.toString())
         .shuffleGrouping(FieldNames.INTER.toString(), FieldNames.VILLEUR.toString())
         .shuffleGrouping(FieldNames.INTER.toString(), FieldNames.VAULX.toString());

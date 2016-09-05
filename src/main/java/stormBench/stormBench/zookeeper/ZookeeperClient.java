@@ -22,14 +22,17 @@ public class ZookeeperClient {
 	private String host;
 	private ZooKeeper zookeeper;
 	private Watcher watcher;
-	private String zNodeName = "/TestTopologyState";
+	private String zNodeState;
+	private String zNodeDate;
 	private byte[] state;
+	private byte[] date;
 	private static Logger logger = Logger.getLogger("ZookeeperClient");
 	
 	public ZookeeperClient(String host, String id) {
 		this.host = host;
 		this.watcher = new WatcherImpl();
-		this.zNodeName = "/" + id + "State";
+		this.zNodeState = "/" + id + "State";
+		this.zNodeDate = "/" + id + "LastEmissionDate";
 		try {
 			this.zookeeper = new ZooKeeper(this.host, 20000, this.watcher);
 		} catch (IOException e) {
@@ -45,21 +48,42 @@ public class ZookeeperClient {
 		}
 	}
 	
-	public Stat existsZNode(){
+	public Stat existsZNodeState(){
 		Stat stat = null;
 		try {
-			stat = this.zookeeper.exists(this.zNodeName,  false);
+			stat = this.zookeeper.exists(this.zNodeState,  false);
 		} catch (KeeperException | InterruptedException e) {
 			logger.severe("Unable to check existence of zNode for state persistence because " + e);
 		}
 		return stat;
 	}
 	
-	public void createZNode(){
+	public Stat existsZNodeDate(){
+		Stat stat = null;
 		try {
-			Stat stat = this.existsZNode();
+			stat = this.zookeeper.exists(this.zNodeDate,  false);
+		} catch (KeeperException | InterruptedException e) {
+			logger.severe("Unable to check existence of zNode for last emission persistence because " + e);
+		}
+		return stat;
+	}
+	
+	public void createZNodeState(){
+		try {
+			Stat stat = this.existsZNodeState();
 			if(stat == null){
-				this.zookeeper.create(this.zNodeName, this.state, ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT);
+				this.zookeeper.create(this.zNodeState, this.state, ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT);
+			}
+		} catch (KeeperException | InterruptedException e) {
+			logger.severe("Unable to create the zNode on " + this.host + " because " + e);
+		}
+	}
+	
+	public void createZNodeDate(){
+		try {
+			Stat stat = this.existsZNodeDate();
+			if(stat == null){
+				this.zookeeper.create(this.zNodeDate, this.date, ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT);
 			}
 		} catch (KeeperException | InterruptedException e) {
 			logger.severe("Unable to create the zNode on " + this.host + " because " + e);
@@ -69,21 +93,46 @@ public class ZookeeperClient {
 	public void persistState(byte[] state){
 		this.state = state;
 		try {
-			Stat stat = this.existsZNode();
+			Stat stat = this.existsZNodeState();
 			if(stat != null){
-				this.zookeeper.setData(this.zNodeName, this.state, stat.getVersion());
+				this.zookeeper.setData(this.zNodeState, this.state, stat.getVersion());
 			}
 		} catch (KeeperException | InterruptedException e) {
 			logger.severe("Unable to persist a state in the zNode because " + e);
+		}
+	}
+	
+	public void persistDate(byte[] date){
+		this.date = date;
+		try {
+			Stat stat = this.existsZNodeDate();
+			if(stat != null){
+				this.zookeeper.setData(this.zNodeDate, this.date, stat.getVersion());
+			}
+		} catch (KeeperException | InterruptedException e) {
+			logger.severe("Unable to persist a last emission date in the zNode because " + e);
 		}
 	}
 
 	public byte[] getState(){
 		byte[] result = null;
 		try {
-			Stat stat = existsZNode();
+			Stat stat = existsZNodeState();
 			if(stat != null){
-				result = this.zookeeper.getData(this.zNodeName, false, stat);
+				result = this.zookeeper.getData(this.zNodeState, false, stat);
+			}
+		} catch (KeeperException | InterruptedException e) {
+			logger.severe("Unable to recover data from the zNode because " + e);
+		}
+		return result;
+	}
+	
+	public byte[] getDate(){
+		byte[] result = null;
+		try {
+			Stat stat = existsZNodeDate();
+			if(stat != null){
+				result = this.zookeeper.getData(this.zNodeDate, false, stat);
 			}
 		} catch (KeeperException | InterruptedException e) {
 			logger.severe("Unable to recover data from the zNode because " + e);

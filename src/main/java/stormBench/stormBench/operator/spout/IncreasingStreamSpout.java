@@ -24,7 +24,6 @@ import stormBench.stormBench.zookeeper.ZookeeperClient;
  */
 public class IncreasingStreamSpout implements IRichSpout {
 
-	
 	/**
 	 * 
 	 */
@@ -51,7 +50,7 @@ public class IncreasingStreamSpout implements IRichSpout {
 		this.replayQueue = new HashMap<>();
 		this.zkClient = new ZookeeperClient(this.stateHost, id);
 		try {
-			if(this.zkClient.existsZNode() != null){
+			if(this.zkClient.existsZNodeState() != null){
 				byte[] rawState = this.zkClient.getState();
 				if(rawState != null){
 					Integer state = Integer.parseInt(new String(this.zkClient.getState(), Charset.defaultCharset().name()));
@@ -61,9 +60,15 @@ public class IncreasingStreamSpout implements IRichSpout {
 					this.index = 0;
 				}
 			}else{
-				this.zkClient.createZNode();
+				this.zkClient.createZNodeState();
 				this.index = 0;
 			}
+			if(this.zkClient.existsZNodeDate() == null){
+				this.zkClient.createZNodeDate();
+			}
+			byte[] rawDate = new Long(System.currentTimeMillis()).toString().getBytes();
+			this.zkClient.persistDate(rawDate);
+			System.out.println("Emission date successfully reinitialized on zNode");
 		} catch (NumberFormatException | UnsupportedEncodingException e) {
 			logger.severe("Unable to decode the current state");
 		}
@@ -107,47 +112,46 @@ public class IncreasingStreamSpout implements IRichSpout {
 		return streamId;
 	}
 	
+	public void emitNewTuple(){
+		String streamId = generateTuple();
+		this.collector.emit(streamId, new Values(35), this.index);
+		this.replayQueue.put(this.index, streamId);
+		this.index++;
+		String state = this.index + "";
+		String date = new Long(System.currentTimeMillis()).toString();
+		this.zkClient.persistState(state.getBytes());
+		this.zkClient.persistDate(date.getBytes());
+	}
+	
 	/* (non-Javadoc)
 	 * @see backtype.storm.spout.ISpout#nextTuple()
 	 */
 	@Override
 	public void nextTuple() {
-		if(this.index < 18000){
-			String streamId = generateTuple();
-			this.collector.emit(streamId, new Values(35), this.index);
-			this.replayQueue.put(this.index, streamId);
-			this.index++;
-			String state = this.index + "";
-			this.zkClient.persistState(state.getBytes());
+		if(this.index < 20000){
+			Long lastEmission = Long.parseLong(new String(this.zkClient.getDate()));
+			Long now = System.currentTimeMillis();
+			Long interval = now - lastEmission;
+			if(this.index < 200 && interval >= 500){
+				emitNewTuple();
+			}
+			if(this.index >= 200 && this.index < 600 && interval >= 250){
+				emitNewTuple();
+			}
+			if(this.index >= 600 && this.index < 1200 && interval >= 100){
+				emitNewTuple();
+			}
+			if(this.index >= 1200 && this.index < 3000 && interval >= 50){
+				emitNewTuple();
+			}
+			if(this.index >= 3000 && this.index < 8000 && interval >= 10){
+				emitNewTuple();
+			}
+			if(this.index >= 8000 && this.index < 20000 && interval >= 1){
+				emitNewTuple();
+			}
 		}else{
 			System.out.println("End of test stream!");
-		}
-		try {
-			if(this.index < 1000){
-				Thread.sleep(500);
-			}else{
-				if(this.index < 2000){
-					Thread.sleep(250);
-				}else{
-					if(this.index < 4000){
-						Thread.sleep(100);
-					}else{
-						if(this.index < 8000){
-							Thread.sleep(50);
-						}else{
-							if(this.index < 12000){
-								Thread.sleep(10);
-							}else{
-								if(this.index < 16000){
-									Thread.sleep(1);
-								}
-							}
-						}
-					}
-				}
-			}
-		} catch (InterruptedException e) {
-			logger.severe("Unable to sleep the spout because " + e);
 		}
 	}
 
@@ -187,5 +191,4 @@ public class IncreasingStreamSpout implements IRichSpout {
 	public Map<String, Object> getComponentConfiguration() {
 		return null;
 	}
-
 }

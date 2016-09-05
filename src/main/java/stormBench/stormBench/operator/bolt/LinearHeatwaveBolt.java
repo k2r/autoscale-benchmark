@@ -85,7 +85,7 @@ public class LinearHeatwaveBolt implements IRichBolt {
 	 */
 	public void execute(Tuple arg0) {
 		try {
-			Thread.sleep(5);
+			Thread.sleep(1);
 		} catch (InterruptedException e) {
 			logger.severe("Intermediate bolt is unable to sleep because " + e);
 		}
