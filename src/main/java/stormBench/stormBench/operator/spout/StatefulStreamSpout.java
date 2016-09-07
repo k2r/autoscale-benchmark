@@ -22,20 +22,20 @@ import stormBench.stormBench.zookeeper.ZookeeperClient;
  * @author Roland
  *
  */
-public class IncreasingStreamSpout implements IRichSpout {
+public class StatefulStreamSpout implements IRichSpout {
 
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = 2853429592252435680L;
-	private static Logger logger = Logger.getLogger("IncreasingStreamSpout");
+	private static Logger logger = Logger.getLogger("StatefulStreamSpout");
 	private SpoutOutputCollector collector;
 	private int index;
 	private String stateHost;
 	private ZookeeperClient zkClient;
 	private HashMap<Integer, String> replayQueue;
 	
-	public IncreasingStreamSpout(String stateHost) {
+	public StatefulStreamSpout(String stateHost) {
 		this.stateHost = stateHost;
 	}
 	
@@ -128,26 +128,32 @@ public class IncreasingStreamSpout implements IRichSpout {
 	 */
 	@Override
 	public void nextTuple() {
-		if(this.index < 20000){
+		if(this.index < 17400){
 			Long lastEmission = Long.parseLong(new String(this.zkClient.getDate()));
 			Long now = System.currentTimeMillis();
 			Long interval = now - lastEmission;
-			if(this.index < 200 && interval >= 500){
+			if(this.index < 600 && interval >= 250){
 				emitNewTuple();
 			}
-			if(this.index >= 200 && this.index < 600 && interval >= 250){
+			if(this.index >= 600 && this.index < 1800 && interval >= 100){
 				emitNewTuple();
 			}
-			if(this.index >= 600 && this.index < 1200 && interval >= 100){
+			if(this.index >= 1800 && this.index < 3000 && interval >= 50){
 				emitNewTuple();
 			}
-			if(this.index >= 1200 && this.index < 3000 && interval >= 50){
+			if(this.index >= 3000 && this.index < 6000 && interval >= 20){
 				emitNewTuple();
 			}
-			if(this.index >= 3000 && this.index < 8000 && interval >= 10){
+			if(this.index >= 6000 && this.index < 12000 && interval >= 1){
 				emitNewTuple();
 			}
-			if(this.index >= 8000 && this.index < 20000 && interval >= 1){
+			if(this.index >= 12000 && this.index < 15000 && interval >= 20){
+				emitNewTuple();
+			}
+			if(this.index >= 15000 && this.index < 16200 && interval >= 50){
+				emitNewTuple();
+			}
+			if(this.index >= 16200 && this.index < 17400 && interval >= 100){
 				emitNewTuple();
 			}
 		}else{

@@ -6,7 +6,7 @@ import backtype.storm.topology.TopologyBuilder;
 import stormBench.stormBench.operator.bolt.SleepBolt;
 import stormBench.stormBench.operator.bolt.LinearHeatwaveBolt;
 //import stormBench.stormBench.operator.spout.ElementSpout;
-import stormBench.stormBench.operator.spout.IncreasingStreamSpout;
+import stormBench.stormBench.operator.spout.StatefulStreamSpout;
 import stormBench.stormBench.utils.FieldNames;
 import stormBench.stormBench.utils.XmlTopologyConfigParser;
 
@@ -31,20 +31,20 @@ public class LinearTopology {
     	 */
     	
     	//ElementSpout spout = new ElementSpout(parameters.getSgHost(), Integer.parseInt(parameters.getSgPort()));
-    	IncreasingStreamSpout spout = new IncreasingStreamSpout(stateHost);
+    	StatefulStreamSpout spout = new StatefulStreamSpout(stateHost);
         /**
          * Declaration of the linear topology
          */
         TopologyBuilder builder = new TopologyBuilder();
         
-        builder.setSpout(FieldNames.SOURCE.toString(), spout, nbExecutors);
+        builder.setSpout(FieldNames.SOURCE.toString(), spout);
         
         builder.setBolt(FieldNames.INTER.toString(), new LinearHeatwaveBolt(), nbExecutors).setNumTasks(nbTasks)
         .shuffleGrouping(FieldNames.SOURCE.toString(), FieldNames.LYON.toString())
         .shuffleGrouping(FieldNames.SOURCE.toString(), FieldNames.VILLEUR.toString())
         .shuffleGrouping(FieldNames.SOURCE.toString(), FieldNames.VAULX.toString());
         
-        builder.setBolt(FieldNames.SINK.toString(), new SleepBolt(50), nbExecutors).setNumTasks(nbTasks)
+        builder.setBolt(FieldNames.SINK.toString(), new SleepBolt(80), nbExecutors).setNumTasks(nbTasks)
         .shuffleGrouping(FieldNames.INTER.toString(), FieldNames.LYON.toString())
         .shuffleGrouping(FieldNames.INTER.toString(), FieldNames.VILLEUR.toString())
         .shuffleGrouping(FieldNames.INTER.toString(), FieldNames.VAULX.toString());

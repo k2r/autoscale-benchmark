@@ -1,7 +1,6 @@
 C:\These\D3\Depots\storm-topologies\src\main\java\stormBench\stormBench\zookeeper\WatcherImpl.java
 C:\These\D3\Depots\storm-topologies\src\main\java\stormBench\stormBench\operator\spout\StarElementSpout.java
 C:\These\D3\Depots\storm-topologies\src\main\java\stormBench\stormBench\operator\bolt\DiamondHeatwaveBolt.java
-C:\These\D3\Depots\storm-topologies\src\main\java\stormBench\stormBench\operator\spout\IncreasingStreamSpout.java
 C:\These\D3\Depots\storm-topologies\src\main\java\stormBench\stormBench\operator\bolt\LinearHeatwaveBolt.java
 C:\These\D3\Depots\storm-topologies\src\main\java\stormBench\stormBench\zookeeper\ZookeeperClient.java
 C:\These\D3\Depots\storm-topologies\src\main\java\stormBench\stormBench\DiamondTopology.java
@@ -16,3 +15,4 @@ C:\These\D3\Depots\storm-topologies\src\main\java\stormBench\stormBench\utils\RM
 C:\These\D3\Depots\storm-topologies\src\main\java\stormBench\stormBench\operator\spout\ElementSpout.java
 C:\These\D3\Depots\storm-topologies\src\main\java\stormBench\stormBench\StarTopology.java
 C:\These\D3\Depots\storm-topologies\src\main\java\stormBench\stormBench\operator\bolt\SleepBolt.java
+C:\These\D3\Depots\storm-topologies\src\main\java\stormBench\stormBench\operator\spout\StatefulStreamSpout.java

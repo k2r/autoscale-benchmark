@@ -8,8 +8,8 @@ stormBench\stormBench\utils\IRMIStateInfo.class
 stormBench\stormBench\utils\FieldNames.class
 stormBench\stormBench\LinearTopology.class
 stormBench\stormBench\operator\spout\ElementSpout.class
-stormBench\stormBench\operator\spout\IncreasingStreamSpout.class
 stormBench\stormBench\operator\bolt\StarHeatwaveBolt.class
+stormBench\stormBench\operator\spout\StatefulStreamSpout.class
 stormBench\stormBench\operator\bolt\DiamondHeatwaveBolt.class
 stormBench\stormBench\utils\RMIStateInfo.class
 stormBench\stormBench\DiamondTopology.class
