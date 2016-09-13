@@ -153,7 +153,7 @@ public class StatefulStreamSpout implements IRichSpout {
 			if(this.index >= 15000 && this.index < 16200 && interval >= 50){
 				emitNewTuple();
 			}
-			if(this.index >= 16200 && this.index < 17400 && interval >= 100){
+			if(this.index >= 16200 && this.index < 17400 && interval >= 250){
 				emitNewTuple();
 			}
 		}else{
@@ -175,9 +175,9 @@ public class StatefulStreamSpout implements IRichSpout {
 	 */
 	@Override
 	public void fail(Object msgId) {
-		Integer id = (Integer) msgId;
+		/*Integer id = (Integer) msgId;
 		String streamId = this.replayQueue.get(id);
-		this.collector.emit(streamId, new Values(35), id);
+		this.collector.emit(streamId, new Values(35), id);*/
 	}
 	
 	/* (non-Javadoc)
