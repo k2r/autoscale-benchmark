@@ -1,12 +1,14 @@
 package stormBench.stormBench;
 
+import java.util.ArrayList;
+
 import backtype.storm.Config;
 import backtype.storm.StormSubmitter;
 import backtype.storm.topology.TopologyBuilder;
 import stormBench.stormBench.operator.bolt.SleepBolt;
 import stormBench.stormBench.operator.bolt.LinearHeatwaveBolt;
-//import stormBench.stormBench.operator.spout.ElementSpout;
-import stormBench.stormBench.operator.spout.StatefulStreamSpout;
+//import stormBench.stormBench.operator.spout.StreamSimSpout;
+import stormBench.stormBench.operator.spout.SyntheticStreamSpout;
 import stormBench.stormBench.utils.FieldNames;
 import stormBench.stormBench.utils.XmlTopologyConfigParser;
 
@@ -29,9 +31,13 @@ public class LinearTopology {
     	/**
     	 * Declaration of source and sink components
     	 */
+    	ArrayList<Integer> codes = new ArrayList<>();
+    	codes.add(0);
+    	codes.add(1);
+    	codes.add(2);
     	
-    	//ElementSpout spout = new ElementSpout(parameters.getSgHost(), Integer.parseInt(parameters.getSgPort()));
-    	StatefulStreamSpout spout = new StatefulStreamSpout(stateHost);
+    	//StreamSimSpout spout = new StreamSimSpout(parameters.getSgHost(), Integer.parseInt(parameters.getSgPort()));
+    	SyntheticStreamSpout spout = new SyntheticStreamSpout(stateHost, codes);
         /**
          * Declaration of the linear topology
          */

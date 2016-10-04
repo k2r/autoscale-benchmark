@@ -1,3 +1,6 @@
+/**
+ * 
+ */
 package stormBench.stormBench.operator.spout;
 
 import java.rmi.registry.LocateRegistry;
@@ -18,28 +21,32 @@ import core.element.element2.IElement2;
 import core.network.rmi.source.IRMIStreamSource;
 import stormBench.stormBench.utils.FieldNames;
 
-public class StarElementSpout implements IRichSpout{
+/**
+ * @author Roland
+ *
+ */
+
+public class StreamSimSpout implements IRichSpout {
 
 	/**
 	 * 
 	 */
-	private static final long serialVersionUID = -4518942820765585842L;
-	private static Logger logger = Logger.getLogger("StarElementSpoutLogger");
+	private static final long serialVersionUID = -299357684149329360L;
+	private static Logger logger = Logger.getLogger("ElementSpoutLogger");
 	private String host;
 	private int port;
-	private String city;
 	private HashMap<Integer, IElement> inputQueue;
 	private Integer sendIndex;
 	private Integer receiveIndex;
 	private SpoutOutputCollector collector;
-
+	
+	
 	/**
 	 * 
 	 */
-	public StarElementSpout(String host, int port, String city) {
+	public StreamSimSpout(String host, int port) {
 		this.host = host;
 		this.port = port;
-		this.city = city;
 		this.inputQueue = new HashMap<>();
 		this.sendIndex = 0;
 		this.receiveIndex = 0;
@@ -88,11 +95,10 @@ public class StarElementSpout implements IRichSpout{
             }
 		}catch(Exception e){
 			logger.severe("Client exception: " + e.toString());
-			e.printStackTrace();
 		}
 		return input;
 	}
-
+	
 	/* (non-Javadoc)
 	 * @see backtype.storm.spout.ISpout#open(java.util.Map, backtype.storm.task.TopologyContext, backtype.storm.spout.SpoutOutputCollector)
 	 */
@@ -107,7 +113,7 @@ public class StarElementSpout implements IRichSpout{
 	 */
 	@Override
 	public void close() {
-		StarElementSpout.logger.info("StarElementSpout " + StarElementSpout.serialVersionUID + " is being closed.");
+		logger.info("StreamSimSpout " + StreamSimSpout.serialVersionUID + " is being closed.");
 	}
 
 	/* (non-Javadoc)
@@ -115,7 +121,7 @@ public class StarElementSpout implements IRichSpout{
 	 */
 	@Override
 	public void activate() {
-		StarElementSpout.logger.info("StarElementSpout " + StarElementSpout.serialVersionUID + " is being activated.");
+		logger.info("StreamSimSpout " + StreamSimSpout.serialVersionUID + " is being activated.");
 	}
 
 	/* (non-Javadoc)
@@ -123,7 +129,7 @@ public class StarElementSpout implements IRichSpout{
 	 */
 	@Override
 	public void deactivate() {
-		StarElementSpout.logger.info("StarElementSpout " + StarElementSpout.serialVersionUID + " is being deactivated.");
+		logger.info("StreamSimSpout " + StreamSimSpout.serialVersionUID + " is being deactivated.");
 	}
 
 	/* (non-Javadoc)
@@ -143,7 +149,7 @@ public class StarElementSpout implements IRichSpout{
 			try {
 				Thread.sleep(1);
 			} catch (InterruptedException e) {
-				logger.severe("ElementSpout can not sleep because of " + e);
+				logger.severe("StreamSimSpout can not sleep because of " + e);
 			}
 		}
 		if(this.receiveIndex > this.sendIndex){
@@ -159,11 +165,9 @@ public class StarElementSpout implements IRichSpout{
 			case(3):	streamId = FieldNames.VAULX.toString();
 			break;
 			}
-			if(streamId.equalsIgnoreCase(this.city)){
-				this.collector.emit(streamId, new Values(temperature), this.sendIndex);
-				this.sendIndex++;
-				logger.info("ElementSpout info, tuples received: " + receiveIndex + ", tuples pending: " + this.inputQueue.size() + ", tuples transmitted: " + sendIndex);
-			}
+			this.collector.emit(streamId, new Values(temperature), this.sendIndex);
+			this.sendIndex++;
+			//logger.info("StreamSimSpout info, tuples received: " + receiveIndex + ", tuples pending: " + this.inputQueue.size() + ", tuples transmitted: " + sendIndex);
 		}
 	}
 
@@ -174,7 +178,7 @@ public class StarElementSpout implements IRichSpout{
 	public void ack(Object msgId) {
 		Integer id  = (Integer) msgId;
 		this.inputQueue.remove(id);
-		logger.fine("StarElementSpout " + StarElementSpout.serialVersionUID + " acked tuple " + id + ".");
+		logger.fine("StreamSimSpout " + StreamSimSpout.serialVersionUID + " acked tuple " + id + ".");
 	}
 
 	/* (non-Javadoc)
@@ -196,10 +200,8 @@ public class StarElementSpout implements IRichSpout{
 		case(3):	streamId = FieldNames.VAULX.toString();
 		break;
 		}
-		if(streamId.equalsIgnoreCase(this.city)){
-			this.collector.emit(streamId, new Values(temperature), id);
-			logger.fine("StarElementSpout " + StarElementSpout.serialVersionUID + " failed tuple " + id + ". It has been sent again.");
-		}
+		this.collector.emit(streamId, new Values(temperature), id);
+		logger.fine("StreamSimSpout " + StreamSimSpout.serialVersionUID + " failed tuple " + id + ". It has been sent again.");
 	}
 
 	/* (non-Javadoc)

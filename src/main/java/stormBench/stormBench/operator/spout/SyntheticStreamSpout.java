@@ -5,6 +5,7 @@ package stormBench.stormBench.operator.spout;
 
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Logger;
@@ -22,21 +23,24 @@ import stormBench.stormBench.zookeeper.ZookeeperClient;
  * @author Roland
  *
  */
-public class StatefulStreamSpout implements IRichSpout {
+public class SyntheticStreamSpout implements IRichSpout {
 
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = 2853429592252435680L;
-	private static Logger logger = Logger.getLogger("StatefulStreamSpout");
+	private static Logger logger = Logger.getLogger("SyntheticStreamSpout");
 	private SpoutOutputCollector collector;
 	private int index;
 	private String stateHost;
 	private ZookeeperClient zkClient;
 	private HashMap<Integer, String> replayQueue;
 	
-	public StatefulStreamSpout(String stateHost) {
+	private ArrayList<Integer> codes = new ArrayList<>();
+	
+	public SyntheticStreamSpout(String stateHost, ArrayList<Integer> codes) {
 		this.stateHost = stateHost;
+		this.codes = codes;
 	}
 	
 	/* (non-Javadoc)
@@ -45,7 +49,7 @@ public class StatefulStreamSpout implements IRichSpout {
 	@SuppressWarnings("rawtypes")
 	@Override
 	public void open(Map conf, TopologyContext context, SpoutOutputCollector collector) {
-		String id = context.getStormId();
+		String id = context.getThisComponentId();
 		this.collector = collector;
 		this.replayQueue = new HashMap<>();
 		this.zkClient = new ZookeeperClient(this.stateHost, id);
@@ -99,7 +103,9 @@ public class StatefulStreamSpout implements IRichSpout {
 	}
 
 	public String generateTuple(){
-		int code = this.index % 3;
+		int size = this.codes.size();
+		int codeIndex = this.index % size; 
+		int code =  this.codes.get(codeIndex);
 		String streamId = "";
 		switch(code){
 		case(0): 	streamId = FieldNames.LYON.toString();
@@ -128,7 +134,7 @@ public class StatefulStreamSpout implements IRichSpout {
 	 */
 	@Override
 	public void nextTuple() {
-		if(this.index < 17400){
+		if(this.index < 18000){
 			Long lastEmission = Long.parseLong(new String(this.zkClient.getDate()));
 			Long now = System.currentTimeMillis();
 			Long interval = now - lastEmission;
@@ -153,7 +159,7 @@ public class StatefulStreamSpout implements IRichSpout {
 			if(this.index >= 15000 && this.index < 16200 && interval >= 50){
 				emitNewTuple();
 			}
-			if(this.index >= 16200 && this.index < 17400 && interval >= 250){
+			if(this.index >= 16200 && this.index < 18000 && interval >= 250){
 				emitNewTuple();
 			}
 		}else{
@@ -175,9 +181,9 @@ public class StatefulStreamSpout implements IRichSpout {
 	 */
 	@Override
 	public void fail(Object msgId) {
-		/*Integer id = (Integer) msgId;
+		Integer id = (Integer) msgId;
 		String streamId = this.replayQueue.get(id);
-		this.collector.emit(streamId, new Values(35), id);*/
+		this.collector.emit(streamId, new Values(35), id);
 	}
 	
 	/* (non-Javadoc)

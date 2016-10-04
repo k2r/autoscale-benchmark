@@ -77,12 +77,20 @@ public class DiamondHeatwaveBolt implements IRichBolt {
 	 * @see backtype.storm.topology.IRichBolt#execute(backtype.storm.tuple.Tuple)
 	 */
 	public void execute(Tuple arg0) {
+		try {
+			Thread.sleep(2);
+		} catch (InterruptedException e) {
+			logger.severe("Intermediate bolt is unable to sleep because " + e);
+		}
 		int temperature = arg0.getIntegerByField(FieldNames.TEMPERATURE.toString());
 		if(temperature > this.refValue){
 			collector.emit(this.city, arg0, new Values(0, this.city, this.zipCode, this.latitude, this.longitude, temperature));
 			collector.ack(arg0);
+			return;
+			
 		}else{
 			collector.ack(arg0);
+			return;
 		}
 	}
 	

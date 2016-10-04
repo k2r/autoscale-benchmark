@@ -24,7 +24,7 @@
 	      </descriptorRefs>
 	      <archive>
 	        <manifest>
-	          <mainClass>stormBench.stormBench.LinearTopology</mainClass>
+	          <mainClass>stormBench.stormBench.DiamondTopology</mainClass>
 	        </manifest>
 	      </archive>
 	    </configuration>

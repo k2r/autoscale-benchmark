@@ -1,26 +1,18 @@
 package stormBench.stormBench;
 
-import java.util.Map;
+import java.util.ArrayList;
 
-import org.apache.storm.jdbc.common.ConnectionProvider;
-import org.apache.storm.jdbc.common.HikariCPConnectionProvider;
-import org.apache.storm.jdbc.mapper.JdbcMapper;
-import org.apache.storm.jdbc.mapper.SimpleJdbcMapper;
-import org.apache.storm.shade.com.google.common.collect.Maps;
 
 import backtype.storm.Config;
 import backtype.storm.StormSubmitter;
 import backtype.storm.topology.TopologyBuilder;
-import stormBench.stormBench.operator.bolt.HookableJdbcInsertBolt;
+import stormBench.stormBench.operator.bolt.SleepBolt;
 import stormBench.stormBench.operator.bolt.StarHeatwaveBolt;
-import stormBench.stormBench.operator.spout.StarElementSpout;
+import stormBench.stormBench.operator.spout.SyntheticStreamSpout;
 import stormBench.stormBench.utils.FieldNames;
 import stormBench.stormBench.utils.XmlTopologyConfigParser;
 
 public class StarTopology {
-	
-	protected static final String STAR_TABLE = "results_star";
-	protected static final String JDBC_CONF = "jdbc.conf";
 	
 	public static void main(String[] args) throws Exception {
 		
@@ -30,60 +22,62 @@ public class StarTopology {
 		XmlTopologyConfigParser parameters = new XmlTopologyConfigParser("topParameters.xml");
 		parameters.initParameters();
 		
+		String stateHost = parameters.getStateHost();
 		String topId = parameters.getTopId();
-		String sgHost = parameters.getSgHost();
-		int sgPort = Integer.parseInt(parameters.getSgPort());
+		
 		int nbTasks = Integer.parseInt(parameters.getNbTasks());
 		int nbExecutors = Integer.parseInt(parameters.getNbExecutors());
-		String dbHost = parameters.getStateHost();
 		
-		Map<String, Object> map = Maps.newHashMap();
-    	map.put("dataSourceClassName", "com.mysql.jdbc.jdbc2.optional.MysqlDataSource");
-    	map.put("dataSource.url", "jdbc:mysql://"+ dbHost +"/benchmarks");
-    	map.put("dataSource.user","root");
-
     	/**
     	 * Declaration of source and sink components
     	 */
-        ConnectionProvider connectionProvider = new HikariCPConnectionProvider(map);
-        connectionProvider.prepare();
-
-        JdbcMapper jdbcMapperBench = new SimpleJdbcMapper(STAR_TABLE, connectionProvider);
-        HookableJdbcInsertBolt PersistanceBolt = new HookableJdbcInsertBolt(connectionProvider, jdbcMapperBench)
-        		.withTableName(STAR_TABLE)
-        		.withQueryTimeoutSecs(30);
-        
+    	ArrayList<Integer> code0 = new ArrayList<>();
+    	code0.add(0);
+    	
+    	ArrayList<Integer> code1 = new ArrayList<>();
+    	code1.add(1);
+    	
+    	ArrayList<Integer> code2 = new ArrayList<>();
+    	code2.add(2);
+    	
+    	//StreamSimSpout spout = new StreamSimSpout(parameters.getSgHost(), Integer.parseInt(parameters.getSgPort()));
+    	SyntheticStreamSpout spoutLyon = new SyntheticStreamSpout(stateHost, code0);
+    	
+    	SyntheticStreamSpout spoutVilleur = new SyntheticStreamSpout(stateHost, code1);
+    	
+    	SyntheticStreamSpout spoutVaulx = new SyntheticStreamSpout(stateHost, code2);
+    	
         /**
          * Declaration of the star topology
          */
         TopologyBuilder builder = new TopologyBuilder();
+                
+        builder.setSpout(FieldNames.SOURCE.toString() + FieldNames.LYON.toString(), spoutLyon, nbExecutors).setNumTasks(nbTasks);
         
-        builder.setSpout(FieldNames.LYON.toString(), new StarElementSpout(sgHost, sgPort, FieldNames.LYON.toString()), nbExecutors).setNumTasks(nbTasks);
+        builder.setSpout(FieldNames.SOURCE.toString() + FieldNames.VILLEUR.toString(), spoutVilleur, nbExecutors).setNumTasks(nbTasks);
         
-        builder.setSpout(FieldNames.VILLEUR.toString(), new StarElementSpout(sgHost, sgPort, FieldNames.VILLEUR.toString()), nbExecutors).setNumTasks(nbTasks);
+        builder.setSpout(FieldNames.SOURCE.toString() + FieldNames.VAULX.toString(), spoutVaulx, nbExecutors).setNumTasks(nbTasks);
         
-        builder.setSpout(FieldNames.VAULX.toString(), new StarElementSpout(sgHost, sgPort, FieldNames.VAULX.toString()), nbExecutors).setNumTasks(nbTasks);
-        
-        builder.setBolt("intermediate", new StarHeatwaveBolt(), nbExecutors).setNumTasks(nbTasks)
-        .shuffleGrouping(FieldNames.LYON.toString(), FieldNames.LYON.toString())
-        .shuffleGrouping(FieldNames.VILLEUR.toString(), FieldNames.VILLEUR.toString())
-        .shuffleGrouping(FieldNames.VAULX.toString(), FieldNames.VAULX.toString());
+        builder.setBolt(FieldNames.INTER.toString(), new StarHeatwaveBolt(), nbExecutors).setNumTasks(nbTasks)
+        .shuffleGrouping(FieldNames.SOURCE.toString() + FieldNames.LYON.toString(), FieldNames.LYON.toString())
+        .shuffleGrouping(FieldNames.SOURCE.toString() + FieldNames.VILLEUR.toString(), FieldNames.VILLEUR.toString())
+        .shuffleGrouping(FieldNames.SOURCE.toString() + FieldNames.VAULX.toString(), FieldNames.VAULX.toString());
         		
-        builder.setBolt("sinkLyon", PersistanceBolt, nbExecutors).setNumTasks(nbTasks)
-        .shuffleGrouping("intermediate", FieldNames.LYON.toString());
+        builder.setBolt(FieldNames.SINK.toString() + FieldNames.LYON.toString(), new SleepBolt(80), nbExecutors).setNumTasks(nbTasks)
+        .shuffleGrouping(FieldNames.INTER.toString(), FieldNames.LYON.toString());
         
-        builder.setBolt("sinkVilleurbanne", PersistanceBolt, nbExecutors).setNumTasks(nbTasks)
-        .shuffleGrouping("intermediate", FieldNames.VILLEUR.toString());
+        builder.setBolt(FieldNames.SINK.toString() + FieldNames.VILLEUR.toString(), new SleepBolt(80), nbExecutors).setNumTasks(nbTasks)
+        .shuffleGrouping(FieldNames.INTER.toString(), FieldNames.VILLEUR.toString());
         
-        builder.setBolt("sinkVaulx", PersistanceBolt, nbExecutors).setNumTasks(nbTasks)
-        .shuffleGrouping("intermediate", FieldNames.VAULX.toString());
+        builder.setBolt(FieldNames.SINK.toString() + FieldNames.VAULX.toString(), new SleepBolt(80), nbExecutors).setNumTasks(nbTasks)
+        .shuffleGrouping(FieldNames.INTER.toString(), FieldNames.VAULX.toString());
         
         /**
          * Configuration of metadata of the topology
          */
         Config config = new Config();
         config.setNumAckers(8);
-        config.put(JDBC_CONF, map);
+        config.setNumWorkers(24);
 		
 		/**
 		 * Call to the topology submitter for storm

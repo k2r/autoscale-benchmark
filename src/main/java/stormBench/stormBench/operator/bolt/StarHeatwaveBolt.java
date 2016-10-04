@@ -83,6 +83,11 @@ public class StarHeatwaveBolt implements IRichBolt{
 	 * @see backtype.storm.topology.IRichBolt#execute(backtype.storm.tuple.Tuple)
 	 */
 	public void execute(Tuple arg0) {
+		try {
+			Thread.sleep(2);
+		} catch (InterruptedException e) {
+			logger.severe("Intermediate bolt is unable to sleep because " + e);
+		}
 		int temperature = arg0.getIntegerByField(FieldNames.TEMPERATURE.toString());
 		String streamId = arg0.getSourceStreamId();
 		if(streamId.equalsIgnoreCase(FieldNames.LYON.toString())){
@@ -91,8 +96,10 @@ public class StarHeatwaveBolt implements IRichBolt{
 						Double.parseDouble(this.lyon.get(latitude)), Double.parseDouble(this.lyon.get(longitude)),
 						temperature));
 				collector.ack(arg0);
+				return;
 			}else{
 				collector.ack(arg0);
+				return;
 			}
 		}
 		if(streamId.equalsIgnoreCase(FieldNames.VILLEUR.toString())){
@@ -101,8 +108,10 @@ public class StarHeatwaveBolt implements IRichBolt{
 						Double.parseDouble(this.villeurbanne.get(latitude)), Double.parseDouble(this.villeurbanne.get(longitude)),
 						temperature));
 				collector.ack(arg0);
+				return;
 			}else{
 				collector.ack(arg0);
+				return;
 			}
 		}
 		if(streamId.equalsIgnoreCase(FieldNames.VAULX.toString())){
@@ -111,8 +120,10 @@ public class StarHeatwaveBolt implements IRichBolt{
 						Double.parseDouble(this.vaulx.get(latitude)), Double.parseDouble(this.vaulx.get(longitude)),
 						temperature));
 				collector.ack(arg0);
+				return;
 			}else{
 				collector.ack(arg0);
+				return;
 			}
 		}
 	}
