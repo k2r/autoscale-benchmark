@@ -29,7 +29,8 @@ public class XmlTopologyConfigParser {
 	private String sgHost;
 	private String sgPort;
 	private String nbTasks;
-	private String nbExecutors;
+	private String interNbExecutors;
+	private String sinkNbExecutors;
 	private String dbHost;
 	private String windowSize;
 	private String windowStep;
@@ -122,19 +123,33 @@ public class XmlTopologyConfigParser {
 	}
 
 	/**
-	 * @return the nbExecutors
+	 * @return the interNbExecutors
 	 */
-	public String getNbExecutors() {
-		return nbExecutors;
+	public String getInterNbExecutors() {
+		return interNbExecutors;
 	}
 
 	/**
 	 * @param nbExecutors the nbExecutors to set
 	 */
-	public void setNbExecutors(String nbExecutors) {
-		this.nbExecutors = nbExecutors;
+	public void setInterNbExecutors(String nbExecutors) {
+		this.interNbExecutors = nbExecutors;
 	}
 
+	/**
+	 * @return the sinkNbExecutors
+	 */
+	public String getSinkNbExecutors() {
+		return sinkNbExecutors;
+	}
+
+	/**
+	 * @param nbExecutors the nbExecutors to set
+	 */
+	public void setSinkNbExecutors(String nbExecutors) {
+		this.sinkNbExecutors = nbExecutors;
+	}
+	
 	public String getStateHost(){
 		return this.dbHost;
 	}
@@ -182,8 +197,10 @@ public class XmlTopologyConfigParser {
 		this.setSgHost(sghost.item(0).getTextContent());
 		final NodeList nbtasks = parameters.getElementsByTagName(TopologyConfigNodeNames.NBTASKS.toString());
 		this.setNbTasks(nbtasks.item(0).getTextContent());
-		final NodeList nbexecutors = parameters.getElementsByTagName(TopologyConfigNodeNames.NBEXECS.toString());
-		this.setNbExecutors(nbexecutors.item(0).getTextContent());
+		final NodeList interNbexecutors = parameters.getElementsByTagName(TopologyConfigNodeNames.INTERNBEXECS.toString());
+		this.setInterNbExecutors(interNbexecutors.item(0).getTextContent());
+		final NodeList sinkNbexecutors = parameters.getElementsByTagName(TopologyConfigNodeNames.SINKNBEXECS.toString());
+		this.setSinkNbExecutors(sinkNbexecutors.item(0).getTextContent());
 		final NodeList dbhost = parameters.getElementsByTagName(TopologyConfigNodeNames.STATEHOST.toString());
 		this.setDbHost(dbhost.item(0).getTextContent());
 		final NodeList size = parameters.getElementsByTagName(TopologyConfigNodeNames.SIZE.toString());

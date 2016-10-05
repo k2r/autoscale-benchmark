@@ -26,7 +26,8 @@ public class StarTopology {
 		String topId = parameters.getTopId();
 		
 		int nbTasks = Integer.parseInt(parameters.getNbTasks());
-		int nbExecutors = Integer.parseInt(parameters.getNbExecutors());
+		int interNbExecutors = Integer.parseInt(parameters.getInterNbExecutors());
+		int sinkNbExecutors = Integer.parseInt(parameters.getSinkNbExecutors());
 		
     	/**
     	 * Declaration of source and sink components
@@ -52,24 +53,24 @@ public class StarTopology {
          */
         TopologyBuilder builder = new TopologyBuilder();
                 
-        builder.setSpout(FieldNames.SOURCE.toString() + FieldNames.LYON.toString(), spoutLyon, nbExecutors).setNumTasks(nbTasks);
+        builder.setSpout(FieldNames.SOURCE.toString() + FieldNames.LYON.toString(), spoutLyon);
         
-        builder.setSpout(FieldNames.SOURCE.toString() + FieldNames.VILLEUR.toString(), spoutVilleur, nbExecutors).setNumTasks(nbTasks);
+        builder.setSpout(FieldNames.SOURCE.toString() + FieldNames.VILLEUR.toString(), spoutVilleur);
         
-        builder.setSpout(FieldNames.SOURCE.toString() + FieldNames.VAULX.toString(), spoutVaulx, nbExecutors).setNumTasks(nbTasks);
+        builder.setSpout(FieldNames.SOURCE.toString() + FieldNames.VAULX.toString(), spoutVaulx);
         
-        builder.setBolt(FieldNames.INTER.toString(), new StarHeatwaveBolt(), nbExecutors).setNumTasks(nbTasks)
+        builder.setBolt(FieldNames.INTER.toString(), new StarHeatwaveBolt(), interNbExecutors).setNumTasks(nbTasks)
         .shuffleGrouping(FieldNames.SOURCE.toString() + FieldNames.LYON.toString(), FieldNames.LYON.toString())
         .shuffleGrouping(FieldNames.SOURCE.toString() + FieldNames.VILLEUR.toString(), FieldNames.VILLEUR.toString())
         .shuffleGrouping(FieldNames.SOURCE.toString() + FieldNames.VAULX.toString(), FieldNames.VAULX.toString());
         		
-        builder.setBolt(FieldNames.SINK.toString() + FieldNames.LYON.toString(), new SleepBolt(80), nbExecutors).setNumTasks(nbTasks)
+        builder.setBolt(FieldNames.SINK.toString() + FieldNames.LYON.toString(), new SleepBolt(80), sinkNbExecutors).setNumTasks(nbTasks)
         .shuffleGrouping(FieldNames.INTER.toString(), FieldNames.LYON.toString());
         
-        builder.setBolt(FieldNames.SINK.toString() + FieldNames.VILLEUR.toString(), new SleepBolt(80), nbExecutors).setNumTasks(nbTasks)
+        builder.setBolt(FieldNames.SINK.toString() + FieldNames.VILLEUR.toString(), new SleepBolt(80), sinkNbExecutors).setNumTasks(nbTasks)
         .shuffleGrouping(FieldNames.INTER.toString(), FieldNames.VILLEUR.toString());
         
-        builder.setBolt(FieldNames.SINK.toString() + FieldNames.VAULX.toString(), new SleepBolt(80), nbExecutors).setNumTasks(nbTasks)
+        builder.setBolt(FieldNames.SINK.toString() + FieldNames.VAULX.toString(), new SleepBolt(80), sinkNbExecutors).setNumTasks(nbTasks)
         .shuffleGrouping(FieldNames.INTER.toString(), FieldNames.VAULX.toString());
         
         /**

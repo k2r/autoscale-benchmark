@@ -11,7 +11,8 @@ public enum TopologyConfigNodeNames {
 	SGPORT("stream_port"),
 	SGHOST("stream_host"),
 	NBTASKS("nb_tasks"),
-	NBEXECS("nb_executors"),
+	INTERNBEXECS("intermediate_nb_executors"),
+	SINKNBEXECS("sink_nb_executors"),
 	STATEHOST("state_host"),
 	SIZE("window_size"),
 	STEP("window_step");
