@@ -32,21 +32,17 @@ public class StarTopology {
     	/**
     	 * Declaration of source and sink components
     	 */
-    	ArrayList<Integer> code0 = new ArrayList<>();
-    	code0.add(0);
-    	
-    	ArrayList<Integer> code1 = new ArrayList<>();
-    	code1.add(1);
-    	
-    	ArrayList<Integer> code2 = new ArrayList<>();
-    	code2.add(2);
+		ArrayList<Integer> codes = new ArrayList<>();
+    	codes.add(0);
+    	codes.add(1);
+    	codes.add(2);
     	
     	//StreamSimSpout spout = new StreamSimSpout(parameters.getSgHost(), Integer.parseInt(parameters.getSgPort()));
-    	SyntheticStreamSpout spoutLyon = new SyntheticStreamSpout(stateHost, code0);
+    	SyntheticStreamSpout spoutLyon = new SyntheticStreamSpout(stateHost, codes, FieldNames.LYON.toString());
     	
-    	SyntheticStreamSpout spoutVilleur = new SyntheticStreamSpout(stateHost, code1);
+    	SyntheticStreamSpout spoutVilleur = new SyntheticStreamSpout(stateHost, codes, FieldNames.VILLEUR.toString());
     	
-    	SyntheticStreamSpout spoutVaulx = new SyntheticStreamSpout(stateHost, code2);
+    	SyntheticStreamSpout spoutVaulx = new SyntheticStreamSpout(stateHost, codes, FieldNames.VAULX.toString());
     	
         /**
          * Declaration of the star topology
@@ -64,13 +60,13 @@ public class StarTopology {
         .shuffleGrouping(FieldNames.SOURCE.toString() + FieldNames.VILLEUR.toString(), FieldNames.VILLEUR.toString())
         .shuffleGrouping(FieldNames.SOURCE.toString() + FieldNames.VAULX.toString(), FieldNames.VAULX.toString());
         		
-        builder.setBolt(FieldNames.SINK.toString() + FieldNames.LYON.toString(), new SleepBolt(80), sinkNbExecutors).setNumTasks(nbTasks)
+        builder.setBolt(FieldNames.SINK.toString() + FieldNames.LYON.toString(), new SleepBolt(240), sinkNbExecutors).setNumTasks(nbTasks)
         .shuffleGrouping(FieldNames.INTER.toString(), FieldNames.LYON.toString());
         
-        builder.setBolt(FieldNames.SINK.toString() + FieldNames.VILLEUR.toString(), new SleepBolt(80), sinkNbExecutors).setNumTasks(nbTasks)
+        builder.setBolt(FieldNames.SINK.toString() + FieldNames.VILLEUR.toString(), new SleepBolt(240), sinkNbExecutors).setNumTasks(nbTasks)
         .shuffleGrouping(FieldNames.INTER.toString(), FieldNames.VILLEUR.toString());
         
-        builder.setBolt(FieldNames.SINK.toString() + FieldNames.VAULX.toString(), new SleepBolt(80), sinkNbExecutors).setNumTasks(nbTasks)
+        builder.setBolt(FieldNames.SINK.toString() + FieldNames.VAULX.toString(), new SleepBolt(240), sinkNbExecutors).setNumTasks(nbTasks)
         .shuffleGrouping(FieldNames.INTER.toString(), FieldNames.VAULX.toString());
         
         /**

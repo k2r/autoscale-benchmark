@@ -37,10 +37,18 @@ public class SyntheticStreamSpout implements IRichSpout {
 	private HashMap<Integer, String> replayQueue;
 	
 	private ArrayList<Integer> codes = new ArrayList<>();
+	private String reference;
 	
 	public SyntheticStreamSpout(String stateHost, ArrayList<Integer> codes) {
 		this.stateHost = stateHost;
 		this.codes = codes;
+		this.reference = null;
+	}
+	
+	public SyntheticStreamSpout(String stateHost, ArrayList<Integer> codes, String reference) {
+		this.stateHost = stateHost;
+		this.codes = codes;
+		this.reference = reference;
 	}
 	
 	/* (non-Javadoc)
@@ -49,7 +57,7 @@ public class SyntheticStreamSpout implements IRichSpout {
 	@SuppressWarnings("rawtypes")
 	@Override
 	public void open(Map conf, TopologyContext context, SpoutOutputCollector collector) {
-		String id = context.getThisComponentId();
+		String id = context.getStormId() + "_" +  context.getThisComponentId();
 		this.collector = collector;
 		this.replayQueue = new HashMap<>();
 		this.zkClient = new ZookeeperClient(this.stateHost, id);
@@ -120,7 +128,13 @@ public class SyntheticStreamSpout implements IRichSpout {
 	
 	public void emitNewTuple(){
 		String streamId = generateTuple();
-		this.collector.emit(streamId, new Values(35), this.index);
+		if(this.reference != null){
+			if(streamId.equalsIgnoreCase(this.reference)){
+				this.collector.emit(streamId, new Values(35), this.index);
+			}
+		}else{
+			this.collector.emit(streamId, new Values(35), this.index);
+		}
 		this.replayQueue.put(this.index, streamId);
 		this.index++;
 		String state = this.index + "";
