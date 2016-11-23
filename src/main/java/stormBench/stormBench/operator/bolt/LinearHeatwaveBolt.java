@@ -4,13 +4,13 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Logger;
 
-import backtype.storm.task.OutputCollector;
-import backtype.storm.task.TopologyContext;
-import backtype.storm.topology.IRichBolt;
-import backtype.storm.topology.OutputFieldsDeclarer;
-import backtype.storm.tuple.Fields;
-import backtype.storm.tuple.Tuple;
-import backtype.storm.tuple.Values;
+import org.apache.storm.task.OutputCollector;
+import org.apache.storm.task.TopologyContext;
+import org.apache.storm.topology.IRichBolt;
+import org.apache.storm.topology.OutputFieldsDeclarer;
+import org.apache.storm.tuple.Fields;
+import org.apache.storm.tuple.Tuple;
+import org.apache.storm.tuple.Values;
 import stormBench.stormBench.utils.FieldNames;
 
 public class LinearHeatwaveBolt implements IRichBolt {
@@ -58,7 +58,7 @@ public class LinearHeatwaveBolt implements IRichBolt {
 	}
 	
 	/* (non-Javadoc)
-	 * @see backtype.storm.topology.IComponent#declareOutputFields(backtype.storm.topology.OutputFieldsDeclarer)
+	 * @see org.apache.storm.topology.IComponent#declareOutputFields(org.apache.storm.topology.OutputFieldsDeclarer)
 	 */
 	public void declareOutputFields(OutputFieldsDeclarer arg0) {
 		arg0.declareStream(FieldNames.LYON.toString(), new Fields(FieldNames.ID.toString(), FieldNames.CITY.toString(), FieldNames.ZIP.toString(), FieldNames.LAT.toString(), FieldNames.LONGIT.toString(), FieldNames.TEMPERATURE.toString()));
@@ -67,21 +67,21 @@ public class LinearHeatwaveBolt implements IRichBolt {
 	}
 
 	/* (non-Javadoc)
-	 * @see backtype.storm.topology.IComponent#getComponentConfiguration()
+	 * @see org.apache.storm.topology.IComponent#getComponentConfiguration()
 	 */
 	public Map<String, Object> getComponentConfiguration() {
 		return null;
 	}
 
 	/* (non-Javadoc)
-	 * @see backtype.storm.topology.IBasicBolt#cleanup()
+	 * @see org.apache.storm.topology.IBasicBolt#cleanup()
 	 */
 	public void cleanup() {
 		LinearHeatwaveBolt.logger.info("LinearHeatwaveBolt " + LinearHeatwaveBolt.serialVersionUID + " is going to shutdown");
 	}
 	
 	/* (non-Javadoc)
-	 * @see backtype.storm.topology.IRichBolt#execute(backtype.storm.tuple.Tuple)
+	 * @see org.apache.storm.topology.IRichBolt#execute(org.apache.storm.tuple.Tuple)
 	 */
 	public void execute(Tuple arg0) {
 		try {
@@ -130,7 +130,7 @@ public class LinearHeatwaveBolt implements IRichBolt {
 	}
 	
 	/* (non-Javadoc)
-	 * @see backtype.storm.topology.IRichBolt#prepare(java.util.Map, backtype.storm.task.TopologyContext, backtype.storm.task.OutputCollector)
+	 * @see org.apache.storm.topology.IRichBolt#prepare(java.util.Map, org.apache.storm.task.TopologyContext, org.apache.storm.task.OutputCollector)
 	 */
 	@SuppressWarnings("rawtypes")
 	public void prepare(Map arg0, TopologyContext context, OutputCollector collector) {

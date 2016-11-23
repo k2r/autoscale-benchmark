@@ -10,12 +10,12 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Logger;
 
-import backtype.storm.spout.SpoutOutputCollector;
-import backtype.storm.task.TopologyContext;
-import backtype.storm.topology.IRichSpout;
-import backtype.storm.topology.OutputFieldsDeclarer;
-import backtype.storm.tuple.Fields;
-import backtype.storm.tuple.Values;
+import org.apache.storm.spout.SpoutOutputCollector;
+import org.apache.storm.task.TopologyContext;
+import org.apache.storm.topology.IRichSpout;
+import org.apache.storm.topology.OutputFieldsDeclarer;
+import org.apache.storm.tuple.Fields;
+import org.apache.storm.tuple.Values;
 import core.element.IElement;
 import core.element.element2.IElement2;
 import core.network.rmi.source.IRMIStreamSource;
@@ -100,7 +100,7 @@ public class StreamSimSpout implements IRichSpout {
 	}
 	
 	/* (non-Javadoc)
-	 * @see backtype.storm.spout.ISpout#open(java.util.Map, backtype.storm.task.TopologyContext, backtype.storm.spout.SpoutOutputCollector)
+	 * @see org.apache.storm.spout.ISpout#open(java.util.Map, org.apache.storm.task.TopologyContext, org.apache.storm.spout.SpoutOutputCollector)
 	 */
 	@SuppressWarnings("rawtypes")
 	@Override
@@ -109,7 +109,7 @@ public class StreamSimSpout implements IRichSpout {
 	}
 
 	/* (non-Javadoc)
-	 * @see backtype.storm.spout.ISpout#close()
+	 * @see org.apache.storm.spout.ISpout#close()
 	 */
 	@Override
 	public void close() {
@@ -117,7 +117,7 @@ public class StreamSimSpout implements IRichSpout {
 	}
 
 	/* (non-Javadoc)
-	 * @see backtype.storm.spout.ISpout#activate()
+	 * @see org.apache.storm.spout.ISpout#activate()
 	 */
 	@Override
 	public void activate() {
@@ -125,7 +125,7 @@ public class StreamSimSpout implements IRichSpout {
 	}
 
 	/* (non-Javadoc)
-	 * @see backtype.storm.spout.ISpout#deactivate()
+	 * @see org.apache.storm.spout.ISpout#deactivate()
 	 */
 	@Override
 	public void deactivate() {
@@ -133,7 +133,7 @@ public class StreamSimSpout implements IRichSpout {
 	}
 
 	/* (non-Javadoc)
-	 * @see backtype.storm.spout.ISpout#nextTuple()
+	 * @see org.apache.storm.spout.ISpout#nextTuple()
 	 */
 	@SuppressWarnings("rawtypes")
 	@Override
@@ -172,7 +172,7 @@ public class StreamSimSpout implements IRichSpout {
 	}
 
 	/* (non-Javadoc)
-	 * @see backtype.storm.spout.ISpout#ack(java.lang.Object)
+	 * @see org.apache.storm.spout.ISpout#ack(java.lang.Object)
 	 */
 	@Override
 	public void ack(Object msgId) {
@@ -182,7 +182,7 @@ public class StreamSimSpout implements IRichSpout {
 	}
 
 	/* (non-Javadoc)
-	 * @see backtype.storm.spout.ISpout#fail(java.lang.Object)
+	 * @see org.apache.storm.spout.ISpout#fail(java.lang.Object)
 	 */
 	@SuppressWarnings("rawtypes")
 	@Override
@@ -205,7 +205,7 @@ public class StreamSimSpout implements IRichSpout {
 	}
 
 	/* (non-Javadoc)
-	 * @see backtype.storm.topology.IComponent#declareOutputFields(backtype.storm.topology.OutputFieldsDeclarer)
+	 * @see org.apache.storm.topology.IComponent#declareOutputFields(org.apache.storm.topology.OutputFieldsDeclarer)
 	 */
 	@Override
 	public void declareOutputFields(OutputFieldsDeclarer declarer) {
@@ -215,7 +215,7 @@ public class StreamSimSpout implements IRichSpout {
 	}
 
 	/* (non-Javadoc)
-	 * @see backtype.storm.topology.IComponent#getComponentConfiguration()
+	 * @see org.apache.storm.topology.IComponent#getComponentConfiguration()
 	 */
 	@Override
 	public Map<String, Object> getComponentConfiguration() {

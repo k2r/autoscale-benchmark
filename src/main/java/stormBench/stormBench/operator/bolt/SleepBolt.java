@@ -5,11 +5,11 @@ package stormBench.stormBench.operator.bolt;
 
 import java.util.Map;
 
-import backtype.storm.task.OutputCollector;
-import backtype.storm.task.TopologyContext;
-import backtype.storm.topology.IRichBolt;
-import backtype.storm.topology.OutputFieldsDeclarer;
-import backtype.storm.tuple.Tuple;
+import org.apache.storm.task.OutputCollector;
+import org.apache.storm.task.TopologyContext;
+import org.apache.storm.topology.IRichBolt;
+import org.apache.storm.topology.OutputFieldsDeclarer;
+import org.apache.storm.tuple.Tuple;
 
 /**
  * @author Roland
@@ -29,7 +29,7 @@ public class SleepBolt implements IRichBolt {
 	}
 	
 	/* (non-Javadoc)
-	 * @see backtype.storm.task.IBolt#prepare(java.util.Map, backtype.storm.task.TopologyContext, backtype.storm.task.OutputCollector)
+	 * @see org.apache.storm.task.IBolt#prepare(java.util.Map, org.apache.storm.task.TopologyContext, org.apache.storm.task.OutputCollector)
 	 */
 	@SuppressWarnings("rawtypes")
 	@Override
@@ -38,7 +38,7 @@ public class SleepBolt implements IRichBolt {
 	}
 
 	/* (non-Javadoc)
-	 * @see backtype.storm.task.IBolt#execute(backtype.storm.tuple.Tuple)
+	 * @see org.apache.storm.task.IBolt#execute(org.apache.storm.tuple.Tuple)
 	 */
 	@Override
 	public void execute(Tuple input) {
@@ -51,7 +51,7 @@ public class SleepBolt implements IRichBolt {
 	}
 
 	/* (non-Javadoc)
-	 * @see backtype.storm.task.IBolt#cleanup()
+	 * @see org.apache.storm.task.IBolt#cleanup()
 	 */
 	@Override
 	public void cleanup() {
@@ -60,7 +60,7 @@ public class SleepBolt implements IRichBolt {
 	}
 
 	/* (non-Javadoc)
-	 * @see backtype.storm.topology.IComponent#declareOutputFields(backtype.storm.topology.OutputFieldsDeclarer)
+	 * @see org.apache.storm.topology.IComponent#declareOutputFields(org.apache.storm.topology.OutputFieldsDeclarer)
 	 */
 	@Override
 	public void declareOutputFields(OutputFieldsDeclarer declarer) {
@@ -68,7 +68,7 @@ public class SleepBolt implements IRichBolt {
 	}
 
 	/* (non-Javadoc)
-	 * @see backtype.storm.topology.IComponent#getComponentConfiguration()
+	 * @see org.apache.storm.topology.IComponent#getComponentConfiguration()
 	 */
 	@Override
 	public Map<String, Object> getComponentConfiguration() {
