@@ -49,25 +49,33 @@ public class StarTopology {
          */
         TopologyBuilder builder = new TopologyBuilder();
                 
-        builder.setSpout(FieldNames.SOURCE.toString() + FieldNames.LYON.toString(), spoutLyon);
+        builder.setSpout(FieldNames.SOURCE.toString() + FieldNames.LYON.toString(), spoutLyon).setCPULoad(10.0).setMemoryLoad(64.0);
         
-        builder.setSpout(FieldNames.SOURCE.toString() + FieldNames.VILLEUR.toString(), spoutVilleur);
+        builder.setSpout(FieldNames.SOURCE.toString() + FieldNames.VILLEUR.toString(), spoutVilleur).setCPULoad(10.0).setMemoryLoad(64.0);
         
-        builder.setSpout(FieldNames.SOURCE.toString() + FieldNames.VAULX.toString(), spoutVaulx);
+        builder.setSpout(FieldNames.SOURCE.toString() + FieldNames.VAULX.toString(), spoutVaulx).setCPULoad(10.0).setMemoryLoad(64.0);
         
         builder.setBolt(FieldNames.INTER.toString(), new StarHeatwaveBolt(), interNbExecutors).setNumTasks(nbTasks)
         .shuffleGrouping(FieldNames.SOURCE.toString() + FieldNames.LYON.toString(), FieldNames.LYON.toString())
         .shuffleGrouping(FieldNames.SOURCE.toString() + FieldNames.VILLEUR.toString(), FieldNames.VILLEUR.toString())
-        .shuffleGrouping(FieldNames.SOURCE.toString() + FieldNames.VAULX.toString(), FieldNames.VAULX.toString());
+        .shuffleGrouping(FieldNames.SOURCE.toString() + FieldNames.VAULX.toString(), FieldNames.VAULX.toString())
+        .setCPULoad(20.0)
+        .setMemoryLoad(256.0);
         		
         builder.setBolt(FieldNames.SINK.toString() + FieldNames.LYON.toString(), new SleepBolt(240), sinkNbExecutors).setNumTasks(nbTasks)
-        .shuffleGrouping(FieldNames.INTER.toString(), FieldNames.LYON.toString());
+        .shuffleGrouping(FieldNames.INTER.toString(), FieldNames.LYON.toString())
+        .setCPULoad(100.0)
+        .setMemoryLoad(512.0);
         
         builder.setBolt(FieldNames.SINK.toString() + FieldNames.VILLEUR.toString(), new SleepBolt(240), sinkNbExecutors).setNumTasks(nbTasks)
-        .shuffleGrouping(FieldNames.INTER.toString(), FieldNames.VILLEUR.toString());
+        .shuffleGrouping(FieldNames.INTER.toString(), FieldNames.VILLEUR.toString())
+        .setCPULoad(100.0)
+        .setMemoryLoad(512.0);
         
         builder.setBolt(FieldNames.SINK.toString() + FieldNames.VAULX.toString(), new SleepBolt(240), sinkNbExecutors).setNumTasks(nbTasks)
-        .shuffleGrouping(FieldNames.INTER.toString(), FieldNames.VAULX.toString());
+        .shuffleGrouping(FieldNames.INTER.toString(), FieldNames.VAULX.toString())
+        .setCPULoad(100.0)
+        .setMemoryLoad(512.0);
         
         /**
          * Configuration of metadata of the topology

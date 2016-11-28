@@ -44,17 +44,21 @@ public class LinearTopology {
          */
         TopologyBuilder builder = new TopologyBuilder();
         
-        builder.setSpout(FieldNames.SOURCE.toString(), spout);
+        builder.setSpout(FieldNames.SOURCE.toString(), spout).setCPULoad(10.0).setMemoryLoad(64.0);
         
         builder.setBolt(FieldNames.INTER.toString(), new LinearHeatwaveBolt(), interNbExecutors).setNumTasks(nbTasks)
         .shuffleGrouping(FieldNames.SOURCE.toString(), FieldNames.LYON.toString())
         .shuffleGrouping(FieldNames.SOURCE.toString(), FieldNames.VILLEUR.toString())
-        .shuffleGrouping(FieldNames.SOURCE.toString(), FieldNames.VAULX.toString());
+        .shuffleGrouping(FieldNames.SOURCE.toString(), FieldNames.VAULX.toString())
+        .setCPULoad(20.0)
+        .setMemoryLoad(256.0);
         
         builder.setBolt(FieldNames.SINK.toString(), new SleepBolt(80), sinkNbExecutors).setNumTasks(nbTasks)
         .shuffleGrouping(FieldNames.INTER.toString(), FieldNames.LYON.toString())
         .shuffleGrouping(FieldNames.INTER.toString(), FieldNames.VILLEUR.toString())
-        .shuffleGrouping(FieldNames.INTER.toString(), FieldNames.VAULX.toString());
+        .shuffleGrouping(FieldNames.INTER.toString(), FieldNames.VAULX.toString())
+        .setCPULoad(100.0)
+        .setMemoryLoad(512.0);
         
         /**
          * Configuration of metadata of the topology

@@ -54,21 +54,29 @@ public class DiamondTopology {
          */
         TopologyBuilder builder = new TopologyBuilder();
         
-        builder.setSpout(FieldNames.SOURCE.toString(), spout);
+        builder.setSpout(FieldNames.SOURCE.toString(), spout).setCPULoad(10.0).setMemoryLoad(64.0);
         
         builder.setBolt(FieldNames.INTER.toString() + FieldNames.LYON.toString(), new DiamondHeatwaveBolt(FieldNames.LYON.toString(), 28), interNbExecutors).setNumTasks(nbTasks)
-        .shuffleGrouping(FieldNames.SOURCE.toString(), FieldNames.LYON.toString());
+        .shuffleGrouping(FieldNames.SOURCE.toString(), FieldNames.LYON.toString())
+        .setCPULoad(20.0)
+        .setMemoryLoad(256.0);
         
         builder.setBolt(FieldNames.INTER.toString() + FieldNames.VILLEUR.toString(), new DiamondHeatwaveBolt(FieldNames.VILLEUR.toString(), 30), interNbExecutors).setNumTasks(nbTasks)
-        .shuffleGrouping(FieldNames.SOURCE.toString(), FieldNames.VILLEUR.toString());
+        .shuffleGrouping(FieldNames.SOURCE.toString(), FieldNames.VILLEUR.toString())
+        .setCPULoad(20.0)
+        .setMemoryLoad(256.0);
         
         builder.setBolt(FieldNames.INTER.toString() + FieldNames.VAULX.toString(), new DiamondHeatwaveBolt(FieldNames.VAULX.toString(), 26), interNbExecutors).setNumTasks(nbTasks)
-        .shuffleGrouping(FieldNames.SOURCE.toString(), FieldNames.VAULX.toString());
+        .shuffleGrouping(FieldNames.SOURCE.toString(), FieldNames.VAULX.toString())
+        .setCPULoad(20.0)
+        .setMemoryLoad(256.0);
         
         builder.setBolt(FieldNames.SINK.toString(), new SleepBolt(80), sinkNbExecutors).setNumTasks(nbTasks)
         .shuffleGrouping(FieldNames.INTER.toString() + FieldNames.LYON.toString(), FieldNames.LYON.toString())
         .shuffleGrouping(FieldNames.INTER.toString() + FieldNames.VILLEUR.toString(), FieldNames.VILLEUR.toString())
-        .shuffleGrouping(FieldNames.INTER.toString() + FieldNames.VAULX.toString(), FieldNames.VAULX.toString());
+        .shuffleGrouping(FieldNames.INTER.toString() + FieldNames.VAULX.toString(), FieldNames.VAULX.toString())
+        .setCPULoad(100.0)
+        .setMemoryLoad(512.0);
         
         /**
          * Configuration of metadata of the topology

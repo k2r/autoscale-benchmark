@@ -6,6 +6,7 @@ stormBench\stormBench\utils\FieldNames.class
 stormBench\stormBench\LinearTopology.class
 stormBench\stormBench\operator\spout\StreamSimSpout.class
 stormBench\stormBench\operator\bolt\StarHeatwaveBolt.class
+stormBench\stormBench\operator\SampleHook.class
 stormBench\stormBench\operator\bolt\DiamondHeatwaveBolt.class
 stormBench\stormBench\DiamondTopology.class
 stormBench\stormBench\StarTopology.class
