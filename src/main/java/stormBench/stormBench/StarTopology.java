@@ -64,17 +64,17 @@ public class StarTopology {
         		
         builder.setBolt(FieldNames.SINK.toString() + FieldNames.LYON.toString(), new SleepBolt(240), sinkNbExecutors).setNumTasks(nbTasks)
         .shuffleGrouping(FieldNames.INTER.toString(), FieldNames.LYON.toString())
-        .setCPULoad(100.0)
+        .setCPULoad(40.0)
         .setMemoryLoad(512.0);
         
         builder.setBolt(FieldNames.SINK.toString() + FieldNames.VILLEUR.toString(), new SleepBolt(240), sinkNbExecutors).setNumTasks(nbTasks)
         .shuffleGrouping(FieldNames.INTER.toString(), FieldNames.VILLEUR.toString())
-        .setCPULoad(100.0)
+        .setCPULoad(40.0)
         .setMemoryLoad(512.0);
         
         builder.setBolt(FieldNames.SINK.toString() + FieldNames.VAULX.toString(), new SleepBolt(240), sinkNbExecutors).setNumTasks(nbTasks)
         .shuffleGrouping(FieldNames.INTER.toString(), FieldNames.VAULX.toString())
-        .setCPULoad(100.0)
+        .setCPULoad(40.0)
         .setMemoryLoad(512.0);
         
         /**

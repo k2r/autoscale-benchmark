@@ -57,7 +57,7 @@ public class LinearTopology {
         .shuffleGrouping(FieldNames.INTER.toString(), FieldNames.LYON.toString())
         .shuffleGrouping(FieldNames.INTER.toString(), FieldNames.VILLEUR.toString())
         .shuffleGrouping(FieldNames.INTER.toString(), FieldNames.VAULX.toString())
-        .setCPULoad(100.0)
+        .setCPULoad(80.0)
         .setMemoryLoad(512.0);
         
         /**
