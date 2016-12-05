@@ -9,23 +9,25 @@ import org.apache.storm.task.OutputCollector;
 import org.apache.storm.task.TopologyContext;
 import org.apache.storm.topology.IRichBolt;
 import org.apache.storm.topology.OutputFieldsDeclarer;
+import org.apache.storm.tuple.Fields;
 import org.apache.storm.tuple.Tuple;
+import org.apache.storm.tuple.Values;
+
+import stormBench.stormBench.utils.FieldNames;
 
 /**
  * @author Roland
  *
  */
-public class SleepBolt implements IRichBolt {
+public class EventFilter implements IRichBolt {
 
 	/**
 	 * 
 	 */
-	private static final long serialVersionUID = 2109073700105983429L;
-	private int sleepTime;
+	private static final long serialVersionUID = 1510915526299972969L;
 	private OutputCollector collector;
 	
-	public SleepBolt(int duration) {
-		this.sleepTime = duration;
+	public EventFilter() {
 	}
 	
 	/* (non-Javadoc)
@@ -42,10 +44,17 @@ public class SleepBolt implements IRichBolt {
 	 */
 	@Override
 	public void execute(Tuple input) {
-		try {
-			Thread.sleep(this.sleepTime);
-		} catch (InterruptedException e) {
-			e.printStackTrace();
+		String eventType = input.getStringByField(FieldNames.EVTTYPE.toString());
+		
+		if(eventType.equalsIgnoreCase("view")){
+			Integer userID = input.getIntegerByField(FieldNames.USERID.toString());
+			Integer pageID = input.getIntegerByField(FieldNames.PGID.toString());
+			Integer adID = input.getIntegerByField(FieldNames.ADID.toString());
+			String adType = input.getStringByField(FieldNames.ADTYPE.toString());	
+			Integer eventTime = input.getIntegerByField(FieldNames.EVTTIME.toString());
+			String ipAddress = input.getStringByField(FieldNames.IP.toString());
+			
+			this.collector.emit(new Values(userID, pageID, adID, adType, eventType, eventTime, ipAddress));
 		}
 		this.collector.ack(input);
 	}
@@ -62,6 +71,7 @@ public class SleepBolt implements IRichBolt {
 	 */
 	@Override
 	public void declareOutputFields(OutputFieldsDeclarer declarer) {
+		declarer.declare(new Fields(FieldNames.USERID.toString(), FieldNames.PGID.toString(), FieldNames.ADID.toString(), FieldNames.ADTYPE.toString(), FieldNames.EVTTYPE.toString(), FieldNames.EVTTIME.toString(), FieldNames.IP.toString()));
 	}
 
 	/* (non-Javadoc)

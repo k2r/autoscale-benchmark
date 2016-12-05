@@ -15,7 +15,16 @@ public enum FieldNames {
 	SINK("sink"),
 	SINKLYON("sinkLyon"),
 	SINKVILL("sinkVilleurbanne"),
-	SINKVLX("sinkVaulx");
+	SINKVLX("sinkVaulx"),
+	USERID("user_id"),
+	PGID("page_id"),
+	ADID("ad_id"),
+	ADTYPE("ad_type"),
+	EVTTYPE("event_type"),
+	EVTTIME("event_time"),
+	IP("ip_address"),
+	LOGS("logs"),
+	CAMPID("campaign_id");
 	
 
 	private String name = "";

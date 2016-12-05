@@ -9,23 +9,25 @@ import org.apache.storm.task.OutputCollector;
 import org.apache.storm.task.TopologyContext;
 import org.apache.storm.topology.IRichBolt;
 import org.apache.storm.topology.OutputFieldsDeclarer;
+import org.apache.storm.tuple.Fields;
 import org.apache.storm.tuple.Tuple;
+import org.apache.storm.tuple.Values;
+
+import stormBench.stormBench.utils.FieldNames;
 
 /**
  * @author Roland
  *
  */
-public class SleepBolt implements IRichBolt {
+public class DeserializeBolt implements IRichBolt {
 
 	/**
 	 * 
 	 */
-	private static final long serialVersionUID = 2109073700105983429L;
-	private int sleepTime;
+	private static final long serialVersionUID = 1314812838594234494L;
 	private OutputCollector collector;
 	
-	public SleepBolt(int duration) {
-		this.sleepTime = duration;
+	public DeserializeBolt() {
 	}
 	
 	/* (non-Javadoc)
@@ -42,11 +44,21 @@ public class SleepBolt implements IRichBolt {
 	 */
 	@Override
 	public void execute(Tuple input) {
+		String log = input.getStringByField(FieldNames.LOGS.toString());
+		String[] fields = log.split(";");
+		Integer userID = Integer.parseInt(fields[0]);
+		Integer pageID = Integer.parseInt(fields[1]);
+		Integer adID = Integer.parseInt(fields[2]);
+		String adType = fields[3];
+		String eventType = fields[4];
+		Integer eventTime = Integer.parseInt(fields[5]);
+		String ipAddress = fields[6];
 		try {
-			Thread.sleep(this.sleepTime);
+			Thread.sleep(1);
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
+		this.collector.emit(new Values(userID, pageID, adID, adType, eventType, eventTime, ipAddress));
 		this.collector.ack(input);
 	}
 
@@ -62,6 +74,7 @@ public class SleepBolt implements IRichBolt {
 	 */
 	@Override
 	public void declareOutputFields(OutputFieldsDeclarer declarer) {
+		declarer.declare(new Fields(FieldNames.USERID.toString(), FieldNames.PGID.toString(), FieldNames.ADID.toString(), FieldNames.ADTYPE.toString(), FieldNames.EVTTYPE.toString(), FieldNames.EVTTIME.toString(), FieldNames.IP.toString()));
 	}
 
 	/* (non-Javadoc)

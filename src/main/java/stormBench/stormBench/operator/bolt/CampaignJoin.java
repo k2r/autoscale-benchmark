@@ -3,29 +3,50 @@
  */
 package stormBench.stormBench.operator.bolt;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.storm.task.OutputCollector;
 import org.apache.storm.task.TopologyContext;
 import org.apache.storm.topology.IRichBolt;
 import org.apache.storm.topology.OutputFieldsDeclarer;
+import org.apache.storm.tuple.Fields;
 import org.apache.storm.tuple.Tuple;
+import org.apache.storm.tuple.Values;
+
+import stormBench.stormBench.utils.FieldNames;
 
 /**
  * @author Roland
  *
  */
-public class SleepBolt implements IRichBolt {
+public class CampaignJoin implements IRichBolt {
 
 	/**
 	 * 
 	 */
-	private static final long serialVersionUID = 2109073700105983429L;
-	private int sleepTime;
+	private static final long serialVersionUID = 2051315972010187684L;
 	private OutputCollector collector;
+	private HashMap<Integer, ArrayList<Integer>> campaigns;
 	
-	public SleepBolt(int duration) {
-		this.sleepTime = duration;
+	public CampaignJoin() {
+		this.campaigns = new HashMap<>();
+		ArrayList<Integer> campaign1 = new ArrayList<>();
+		for(int i = 0; i < 1000; i++){
+			campaign1.add(i);
+		}
+		ArrayList<Integer> campaign2 = new ArrayList<>();
+		for(int i = 1000; i < 2000; i++){
+			campaign2.add(i);
+		}
+		ArrayList<Integer> campaign3 = new ArrayList<>();
+		for(int i = 2000; i < 3000; i++){
+			campaign3.add(i);
+		}
+		campaigns.put(1, campaign1);
+		campaigns.put(2, campaign2);
+		campaigns.put(3, campaign3);
 	}
 	
 	/* (non-Javadoc)
@@ -42,10 +63,19 @@ public class SleepBolt implements IRichBolt {
 	 */
 	@Override
 	public void execute(Tuple input) {
-		try {
-			Thread.sleep(this.sleepTime);
-		} catch (InterruptedException e) {
-			e.printStackTrace();
+		Integer adID = input.getIntegerByField(FieldNames.ADID.toString());
+		Integer eventTime = input.getIntegerByField(FieldNames.EVTTIME.toString());
+		boolean found = false;
+		for(Integer campaignID : campaigns.keySet()){
+			ArrayList<Integer> ads = campaigns.get(campaignID);
+			if(ads.contains(adID)){
+				this.collector.emit(new Values(campaignID, adID, eventTime));
+				found = true;
+				break;
+			}
+			if(found){
+				break;
+			}
 		}
 		this.collector.ack(input);
 	}
@@ -62,6 +92,7 @@ public class SleepBolt implements IRichBolt {
 	 */
 	@Override
 	public void declareOutputFields(OutputFieldsDeclarer declarer) {
+		declarer.declare(new Fields(FieldNames.CAMPID.toString(), FieldNames.ADID.toString(), FieldNames.EVTTIME.toString()));
 	}
 
 	/* (non-Javadoc)

@@ -3,6 +3,7 @@
  */
 package stormBench.stormBench.operator.bolt;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.storm.task.OutputCollector;
@@ -11,21 +12,24 @@ import org.apache.storm.topology.IRichBolt;
 import org.apache.storm.topology.OutputFieldsDeclarer;
 import org.apache.storm.tuple.Tuple;
 
+import stormBench.stormBench.utils.FieldNames;
+
 /**
  * @author Roland
  *
  */
-public class SleepBolt implements IRichBolt {
+public class CampaignProcessor implements IRichBolt {
 
+	
 	/**
 	 * 
 	 */
-	private static final long serialVersionUID = 2109073700105983429L;
-	private int sleepTime;
+	private static final long serialVersionUID = -5019548207125601151L;
 	private OutputCollector collector;
+	private HashMap<Integer, Integer> popularities;
 	
-	public SleepBolt(int duration) {
-		this.sleepTime = duration;
+	public CampaignProcessor() {
+		this.popularities = new HashMap<>();
 	}
 	
 	/* (non-Javadoc)
@@ -34,6 +38,7 @@ public class SleepBolt implements IRichBolt {
 	@SuppressWarnings("rawtypes")
 	@Override
 	public void prepare(Map stormConf, TopologyContext context, OutputCollector collector) {
+		
 		this.collector = collector;
 	}
 
@@ -42,11 +47,18 @@ public class SleepBolt implements IRichBolt {
 	 */
 	@Override
 	public void execute(Tuple input) {
+		Integer campaignID = input.getIntegerByField(FieldNames.CAMPID.toString());
+		Integer popularity = popularities.get(campaignID);
 		try {
-			Thread.sleep(this.sleepTime);
+			Thread.sleep(60);
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
+		if(popularity == null){
+			popularity = 0;
+		}
+		popularity++;
+		this.popularities.put(campaignID, popularity);
 		this.collector.ack(input);
 	}
 

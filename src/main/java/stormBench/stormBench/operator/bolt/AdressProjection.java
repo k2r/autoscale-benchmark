@@ -9,23 +9,26 @@ import org.apache.storm.task.OutputCollector;
 import org.apache.storm.task.TopologyContext;
 import org.apache.storm.topology.IRichBolt;
 import org.apache.storm.topology.OutputFieldsDeclarer;
+import org.apache.storm.tuple.Fields;
 import org.apache.storm.tuple.Tuple;
+import org.apache.storm.tuple.Values;
+
+import stormBench.stormBench.utils.FieldNames;
 
 /**
  * @author Roland
  *
  */
-public class SleepBolt implements IRichBolt {
+public class AdressProjection implements IRichBolt {
 
+	
 	/**
 	 * 
 	 */
-	private static final long serialVersionUID = 2109073700105983429L;
-	private int sleepTime;
+	private static final long serialVersionUID = -3052964951640824409L;
 	private OutputCollector collector;
 	
-	public SleepBolt(int duration) {
-		this.sleepTime = duration;
+	public AdressProjection() {
 	}
 	
 	/* (non-Javadoc)
@@ -42,8 +45,10 @@ public class SleepBolt implements IRichBolt {
 	 */
 	@Override
 	public void execute(Tuple input) {
+		String ipAddress = input.getStringByField(FieldNames.IP.toString());
+		this.collector.emit(new Values(ipAddress));
 		try {
-			Thread.sleep(this.sleepTime);
+			Thread.sleep(2);
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
@@ -62,6 +67,7 @@ public class SleepBolt implements IRichBolt {
 	 */
 	@Override
 	public void declareOutputFields(OutputFieldsDeclarer declarer) {
+		declarer.declare(new Fields(FieldNames.IP.toString()));
 	}
 
 	/* (non-Javadoc)

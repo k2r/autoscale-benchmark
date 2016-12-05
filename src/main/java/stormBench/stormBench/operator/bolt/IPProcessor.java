@@ -3,6 +3,7 @@
  */
 package stormBench.stormBench.operator.bolt;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.storm.task.OutputCollector;
@@ -11,21 +12,24 @@ import org.apache.storm.topology.IRichBolt;
 import org.apache.storm.topology.OutputFieldsDeclarer;
 import org.apache.storm.tuple.Tuple;
 
+import stormBench.stormBench.utils.FieldNames;
+
 /**
  * @author Roland
  *
  */
-public class SleepBolt implements IRichBolt {
+public class IPProcessor implements IRichBolt {
 
+	
 	/**
 	 * 
 	 */
-	private static final long serialVersionUID = 2109073700105983429L;
-	private int sleepTime;
+	private static final long serialVersionUID = 6459774252378555862L;
 	private OutputCollector collector;
+	private HashMap<String, Integer> addresses;
 	
-	public SleepBolt(int duration) {
-		this.sleepTime = duration;
+	public IPProcessor() {
+		this.addresses = new HashMap<>();
 	}
 	
 	/* (non-Javadoc)
@@ -34,6 +38,7 @@ public class SleepBolt implements IRichBolt {
 	@SuppressWarnings("rawtypes")
 	@Override
 	public void prepare(Map stormConf, TopologyContext context, OutputCollector collector) {
+		
 		this.collector = collector;
 	}
 
@@ -42,8 +47,15 @@ public class SleepBolt implements IRichBolt {
 	 */
 	@Override
 	public void execute(Tuple input) {
+		String ipAdress = input.getStringByField(FieldNames.IP.toString());
+		Integer occurence = addresses.get(ipAdress);
+		if(occurence == null){
+			occurence = 0;
+		}
+		occurence++;
+		this.addresses.put(ipAdress, occurence);
 		try {
-			Thread.sleep(this.sleepTime);
+			Thread.sleep(60);
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}

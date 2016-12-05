@@ -8,11 +8,11 @@ import org.apache.storm.StormSubmitter;
 import org.apache.storm.topology.TopologyBuilder;
 import stormBench.stormBench.operator.bolt.SleepBolt;
 import stormBench.stormBench.operator.bolt.StarHeatwaveBolt;
-import stormBench.stormBench.operator.spout.SyntheticStreamSpout;
+import stormBench.stormBench.operator.spout.SyntheticSpikeStreamSpout;
 import stormBench.stormBench.utils.FieldNames;
 import stormBench.stormBench.utils.XmlTopologyConfigParser;
 
-public class StarTopology {
+public class StarTopologySpike {
 	
 	public static void main(String[] args) throws Exception {
 		
@@ -38,11 +38,11 @@ public class StarTopology {
     	codes.add(2);
     	
     	//StreamSimSpout spout = new StreamSimSpout(parameters.getSgHost(), Integer.parseInt(parameters.getSgPort()));
-    	SyntheticStreamSpout spoutLyon = new SyntheticStreamSpout(stateHost, codes, FieldNames.LYON.toString());
+    	SyntheticSpikeStreamSpout spoutLyon = new SyntheticSpikeStreamSpout(stateHost, codes, FieldNames.LYON.toString());
     	
-    	SyntheticStreamSpout spoutVilleur = new SyntheticStreamSpout(stateHost, codes, FieldNames.VILLEUR.toString());
+    	SyntheticSpikeStreamSpout spoutVilleur = new SyntheticSpikeStreamSpout(stateHost, codes, FieldNames.VILLEUR.toString());
     	
-    	SyntheticStreamSpout spoutVaulx = new SyntheticStreamSpout(stateHost, codes, FieldNames.VAULX.toString());
+    	SyntheticSpikeStreamSpout spoutVaulx = new SyntheticSpikeStreamSpout(stateHost, codes, FieldNames.VAULX.toString());
     	
         /**
          * Declaration of the star topology
