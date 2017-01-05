@@ -1,4 +1,0 @@
-syntax: glob
-target/stormBench-0.0.1-SNAPSHOT-jar-with-dependencies.jar
-target/stormBench-0.0.1-SNAPSHOT.jar
-.settings/org.hibernate.eclipse.console.prefs
