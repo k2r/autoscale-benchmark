@@ -3,15 +3,14 @@
  */
 package stormBench.stormBench.operator.bolt.radar;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.storm.task.OutputCollector;
 import org.apache.storm.task.TopologyContext;
 import org.apache.storm.topology.IRichBolt;
 import org.apache.storm.topology.OutputFieldsDeclarer;
-import org.apache.storm.tuple.Fields;
 import org.apache.storm.tuple.Tuple;
-import org.apache.storm.tuple.Values;
 
 import stormBench.stormBench.utils.FieldNames;
 
@@ -19,14 +18,15 @@ import stormBench.stormBench.utils.FieldNames;
  * @author Roland
  *
  */
-public class CarMakeProjector implements IRichBolt {
+public class DriverProcessor implements IRichBolt {
 
 	/**
 	 * 
 	 */
-	private static final long serialVersionUID = -4893487724162145615L;
+	private static final long serialVersionUID = 7749654307345810531L;
 
 	private OutputCollector collector;
+	private HashMap<String, Integer> violationCounts;
 	
 	/* (non-Javadoc)
 	 * @see org.apache.storm.task.IBolt#prepare(java.util.Map, org.apache.storm.task.TopologyContext, org.apache.storm.task.OutputCollector)
@@ -35,6 +35,7 @@ public class CarMakeProjector implements IRichBolt {
 	@Override
 	public void prepare(Map stormConf, TopologyContext context, OutputCollector collector) {
 		this.collector = collector;
+		this.violationCounts = new HashMap<>();
 	}
 
 	/* (non-Javadoc)
@@ -42,8 +43,13 @@ public class CarMakeProjector implements IRichBolt {
 	 */
 	@Override
 	public void execute(Tuple input) {
-		String make = input.getStringByField(FieldNames.MAKE.toString());
-		this.collector.emit(new Values(make));
+		String driver = input.getStringByField(FieldNames.DRIVER.toString());
+		if(!this.violationCounts.containsKey(driver)){
+			this.violationCounts.put(driver, 0);
+		}
+		Integer vcount = this.violationCounts.get(driver);
+		vcount++;
+		this.violationCounts.put(driver, vcount);
 		this.collector.ack(input);
 	}
 
@@ -59,7 +65,6 @@ public class CarMakeProjector implements IRichBolt {
 	 */
 	@Override
 	public void declareOutputFields(OutputFieldsDeclarer declarer) {
-		declarer.declare(new Fields(FieldNames.MAKE.toString()));
 	}
 
 	/* (non-Javadoc)

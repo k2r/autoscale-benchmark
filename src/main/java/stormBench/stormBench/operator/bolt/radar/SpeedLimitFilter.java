@@ -3,6 +3,7 @@
  */
 package stormBench.stormBench.operator.bolt.radar;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.storm.task.OutputCollector;
@@ -19,15 +20,16 @@ import stormBench.stormBench.utils.FieldNames;
  * @author Roland
  *
  */
-public class CarMakeProjector implements IRichBolt {
+public class SpeedLimitFilter implements IRichBolt {
 
 	/**
 	 * 
 	 */
-	private static final long serialVersionUID = -4893487724162145615L;
-
-	private OutputCollector collector;
+	private static final long serialVersionUID = -5165262448662846097L;
 	
+	private OutputCollector collector;
+	private HashMap<String, Integer> limits;
+
 	/* (non-Javadoc)
 	 * @see org.apache.storm.task.IBolt#prepare(java.util.Map, org.apache.storm.task.TopologyContext, org.apache.storm.task.OutputCollector)
 	 */
@@ -35,6 +37,11 @@ public class CarMakeProjector implements IRichBolt {
 	@Override
 	public void prepare(Map stormConf, TopologyContext context, OutputCollector collector) {
 		this.collector = collector;
+		this.limits = new HashMap<>();
+		this.limits.put("NORTH", 70);
+		this.limits.put("EAST", 30);
+		this.limits.put("WEST", 50);
+		this.limits.put("SOUTH", 90);
 	}
 
 	/* (non-Javadoc)
@@ -42,8 +49,15 @@ public class CarMakeProjector implements IRichBolt {
 	 */
 	@Override
 	public void execute(Tuple input) {
-		String make = input.getStringByField(FieldNames.MAKE.toString());
-		this.collector.emit(new Values(make));
+		Integer speed = input.getIntegerByField(FieldNames.SPEED.toString());
+		String location = input.getStringByField(FieldNames.LOC.toString());
+		Integer limitByLocation = this.limits.get(location);
+		if(limitByLocation != null){
+			if(speed > limitByLocation){
+				String registration = input.getStringByField(FieldNames.REGISTR.toString());
+				this.collector.emit(new Values(registration, location));
+			}
+		}
 		this.collector.ack(input);
 	}
 
@@ -59,7 +73,7 @@ public class CarMakeProjector implements IRichBolt {
 	 */
 	@Override
 	public void declareOutputFields(OutputFieldsDeclarer declarer) {
-		declarer.declare(new Fields(FieldNames.MAKE.toString()));
+		declarer.declare(new Fields(FieldNames.REGISTR.toString(), FieldNames.LOC.toString()));
 	}
 
 	/* (non-Javadoc)

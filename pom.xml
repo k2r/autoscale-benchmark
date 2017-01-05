@@ -73,13 +73,13 @@
 		<version>0.10.0-beta</version>
 	</dependency>
 	<dependency>
+		<groupId>org.apache.storm</groupId>
+		<artifactId>storm-core</artifactId>
+	</dependency>
+	<dependency>
 		<groupId>StreamSim</groupId>
 		<artifactId>StreamSim</artifactId>
 		<version>0.0.1-SNAPSHOT</version>
-	</dependency>
-	<dependency>
-		<groupId>org.apache.storm</groupId>
-		<artifactId>storm-core</artifactId>
 	</dependency>
   </dependencies>
   <dependencyManagement>

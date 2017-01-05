@@ -37,7 +37,7 @@ public class AdvertisingTopology {
     	AdvertisingStreamSpout spout = new AdvertisingStreamSpout(stateHost);
     	
         /**
-         * Declaration of the linear topology
+         * Declaration of the advertising topology
          */
         TopologyBuilder builder = new TopologyBuilder();
         

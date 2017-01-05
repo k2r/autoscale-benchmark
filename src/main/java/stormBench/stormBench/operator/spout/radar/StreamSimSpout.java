@@ -5,7 +5,6 @@ package stormBench.stormBench.operator.spout.radar;
 
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Logger;
@@ -56,7 +55,7 @@ public class StreamSimSpout implements IRichSpout {
 	 * of attributes describing each tuple. It allows to access attribute values through functions getFirstValue() to getFourthValue()
 	 * @return the last set of tuples sent by the stream source
 	 */
-	public IElement[] getInputStream(){//TODO adapt to MainRMIClient for transaction management
+	public IElement[] getInputStream(){
 		IElement[] input = new IElement[0];
 		try {
 			Registry registry = LocateRegistry.getRegistry(host, port);
@@ -75,25 +74,6 @@ public class StreamSimSpout implements IRichSpout {
 		}catch(Exception e){
 			logger.severe("Client exception: " + e.toString());
 			e.printStackTrace();
-		}
-		return input;
-	}
-	
-	/**
-	 * 
-	 * @return the list of attribute names
-	 */
-	public ArrayList<String> getAttrNames(){
-		ArrayList<String> input = new ArrayList<>();
-		try {
-            Registry registry = LocateRegistry.getRegistry(host, port);
-            if(registry != null){
-            	IRMIStreamSource stub = (IRMIStreamSource) registry.lookup("tuples");
-				input = stub.getAttrNames();
-				registry.unbind("tuples");
-            }
-		}catch(Exception e){
-			logger.severe("Client exception: " + e.toString());
 		}
 		return input;
 	}
@@ -134,7 +114,6 @@ public class StreamSimSpout implements IRichSpout {
 	/* (non-Javadoc)
 	 * @see org.apache.storm.spout.ISpout#nextTuple()
 	 */
-	@SuppressWarnings("rawtypes")
 	@Override
 	public void nextTuple() {
 		IElement[] input = this.getInputStream();
@@ -153,18 +132,14 @@ public class StreamSimSpout implements IRichSpout {
 		}
 		if(this.receiveIndex > this.sendIndex){
 			IElement element = this.inputQueue.get(this.sendIndex);
-			Integer temperature = 0; //TODO
-			Integer code = 0; //TODO
-			String streamId = null;
-			switch(code){
-			case(1): 	streamId = FieldNames.LYON.toString();
-			break;
-			case(2): 	streamId = FieldNames.VILLEUR.toString();
-			break;
-			case(3):	streamId = FieldNames.VAULX.toString();
-			break;
-			}
-			this.collector.emit(streamId, new Values(temperature), this.sendIndex);
+			Object[] values = element.getValues();
+			String registration = (String) values[0];
+			Integer speed = (Integer) values[1];
+			String make = (String) values[2];
+			String color = (String) values[3];
+			String location = (String) values[4];
+			
+			this.collector.emit(new Values(registration, speed, make, color, location), this.sendIndex);
 			this.sendIndex++;
 			//logger.info("StreamSimSpout info, tuples received: " + receiveIndex + ", tuples pending: " + this.inputQueue.size() + ", tuples transmitted: " + sendIndex);
 		}
@@ -183,23 +158,18 @@ public class StreamSimSpout implements IRichSpout {
 	/* (non-Javadoc)
 	 * @see org.apache.storm.spout.ISpout#fail(java.lang.Object)
 	 */
-	@SuppressWarnings("rawtypes")
 	@Override
 	public void fail(Object msgId) {
 		Integer id  = (Integer) msgId;
 		IElement element = this.inputQueue.get(id);
-		Integer temperature = 0;//TODO
-		Integer code = 0;//TODO
-		String streamId = null;
-		switch(code){
-		case(1): 	streamId = FieldNames.LYON.toString();
-		break;
-		case(2): 	streamId = FieldNames.VILLEUR.toString();
-		break;
-		case(3):	streamId = FieldNames.VAULX.toString();
-		break;
-		}
-		this.collector.emit(streamId, new Values(temperature), id);
+		Object[] values = element.getValues();
+		String registration = (String) values[0];
+		Integer speed = (Integer) values[1];
+		String make = (String) values[2];
+		String color = (String) values[3];
+		String location = (String) values[4];
+		
+		this.collector.emit(new Values(registration, speed, make, color, location), id);
 		logger.fine("StreamSimSpout " + StreamSimSpout.serialVersionUID + " failed tuple " + id + ". It has been sent again.");
 	}
 
@@ -208,9 +178,7 @@ public class StreamSimSpout implements IRichSpout {
 	 */
 	@Override
 	public void declareOutputFields(OutputFieldsDeclarer declarer) {
-		declarer.declareStream(FieldNames.LYON.toString(), new Fields(FieldNames.TEMPERATURE.toString()));
-		declarer.declareStream(FieldNames.VILLEUR.toString(), new Fields(FieldNames.TEMPERATURE.toString()));
-		declarer.declareStream(FieldNames.VAULX.toString(), new Fields(FieldNames.TEMPERATURE.toString()));
+		declarer.declare(new Fields(FieldNames.REGISTR.toString(), FieldNames.SPEED.toString(), FieldNames.MAKE.toString(), FieldNames.COLOR.toString(), FieldNames.LOC.toString()));
 	}
 
 	/* (non-Javadoc)

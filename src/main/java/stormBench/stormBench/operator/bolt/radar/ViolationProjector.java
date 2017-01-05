@@ -19,12 +19,12 @@ import stormBench.stormBench.utils.FieldNames;
  * @author Roland
  *
  */
-public class CarMakeProjector implements IRichBolt {
+public class ViolationProjector implements IRichBolt {
 
 	/**
 	 * 
 	 */
-	private static final long serialVersionUID = -4893487724162145615L;
+	private static final long serialVersionUID = 3830635381399033511L;
 
 	private OutputCollector collector;
 	
@@ -42,8 +42,10 @@ public class CarMakeProjector implements IRichBolt {
 	 */
 	@Override
 	public void execute(Tuple input) {
-		String make = input.getStringByField(FieldNames.MAKE.toString());
-		this.collector.emit(new Values(make));
+		String registration = input.getStringByField(FieldNames.REGISTR.toString());
+		Integer speed = input.getIntegerByField(FieldNames.SPEED.toString());
+		String location = input.getStringByField(FieldNames.LOC.toString());
+		this.collector.emit(new Values(registration, speed, location));
 		this.collector.ack(input);
 	}
 
@@ -59,7 +61,7 @@ public class CarMakeProjector implements IRichBolt {
 	 */
 	@Override
 	public void declareOutputFields(OutputFieldsDeclarer declarer) {
-		declarer.declare(new Fields(FieldNames.MAKE.toString()));
+		declarer.declare(new Fields(FieldNames.REGISTR.toString(), FieldNames.SPEED.toString(), FieldNames.LOC.toString()));
 	}
 
 	/* (non-Javadoc)

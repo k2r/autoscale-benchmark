@@ -24,7 +24,13 @@ public enum FieldNames {
 	EVTTIME("event_time"),
 	IP("ip_address"),
 	LOGS("logs"),
-	CAMPID("campaign_id");
+	CAMPID("campaign_id"),
+	REGISTR("registration"),
+	SPEED("speed"),
+	MAKE("make"),
+	COLOR("color"),
+	LOC("location"),
+	DRIVER("driver");
 	
 
 	private String name = "";
