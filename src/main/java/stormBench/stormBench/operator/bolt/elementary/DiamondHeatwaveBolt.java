@@ -1,7 +1,7 @@
 /**
  * 
  */
-package stormBench.stormBench.operator.bolt;
+package stormBench.stormBench.operator.bolt.elementary;
 
 import java.util.Map;
 import java.util.logging.Logger;

@@ -1,4 +1,4 @@
-package stormBench.stormBench.operator.bolt;
+package stormBench.stormBench.operator.bolt.elementary;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -13,13 +13,13 @@ import org.apache.storm.tuple.Tuple;
 import org.apache.storm.tuple.Values;
 import stormBench.stormBench.utils.FieldNames;
 
-public class LinearHeatwaveBolt implements IRichBolt {
+public class StarHeatwaveBolt implements IRichBolt{
 
 	/**
 	 * 
 	 */
-	private static final long serialVersionUID = 4262369370788107343L;
-	private static Logger logger = Logger.getLogger("LinearHeatwaveBolt");
+	private static final long serialVersionUID = 2316929064298169656L;
+	private static Logger logger = Logger.getLogger("StarHeatwaveBolt");
 	private OutputCollector collector;
 	
 	private static final String city = "city";
@@ -32,8 +32,7 @@ public class LinearHeatwaveBolt implements IRichBolt {
 	private HashMap<String, String> villeurbanne;
 	private HashMap<String, String> vaulx;
 	
-	public LinearHeatwaveBolt() {
-		
+	public StarHeatwaveBolt() {
 		this.lyon = new HashMap<>();
 		this.villeurbanne = new HashMap<>();
 		this.vaulx = new HashMap<>();
@@ -77,7 +76,7 @@ public class LinearHeatwaveBolt implements IRichBolt {
 	 * @see org.apache.storm.topology.IBasicBolt#cleanup()
 	 */
 	public void cleanup() {
-		LinearHeatwaveBolt.logger.info("LinearHeatwaveBolt " + LinearHeatwaveBolt.serialVersionUID + " is going to shutdown");
+		StarHeatwaveBolt.logger.info("StarHeatwaveBolt " + StarHeatwaveBolt.serialVersionUID + " is going to shutdown");
 	}
 	
 	/* (non-Javadoc)

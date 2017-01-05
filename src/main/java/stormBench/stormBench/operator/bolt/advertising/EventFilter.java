@@ -1,16 +1,17 @@
 /**
  * 
  */
-package stormBench.stormBench.operator.bolt;
+package stormBench.stormBench.operator.bolt.advertising;
 
-import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.storm.task.OutputCollector;
 import org.apache.storm.task.TopologyContext;
 import org.apache.storm.topology.IRichBolt;
 import org.apache.storm.topology.OutputFieldsDeclarer;
+import org.apache.storm.tuple.Fields;
 import org.apache.storm.tuple.Tuple;
+import org.apache.storm.tuple.Values;
 
 import stormBench.stormBench.utils.FieldNames;
 
@@ -18,18 +19,15 @@ import stormBench.stormBench.utils.FieldNames;
  * @author Roland
  *
  */
-public class IPProcessor implements IRichBolt {
+public class EventFilter implements IRichBolt {
 
-	
 	/**
 	 * 
 	 */
-	private static final long serialVersionUID = 6459774252378555862L;
+	private static final long serialVersionUID = 1510915526299972969L;
 	private OutputCollector collector;
-	private HashMap<String, Integer> addresses;
 	
-	public IPProcessor() {
-		this.addresses = new HashMap<>();
+	public EventFilter() {
 	}
 	
 	/* (non-Javadoc)
@@ -38,7 +36,6 @@ public class IPProcessor implements IRichBolt {
 	@SuppressWarnings("rawtypes")
 	@Override
 	public void prepare(Map stormConf, TopologyContext context, OutputCollector collector) {
-		
 		this.collector = collector;
 	}
 
@@ -47,17 +44,17 @@ public class IPProcessor implements IRichBolt {
 	 */
 	@Override
 	public void execute(Tuple input) {
-		String ipAdress = input.getStringByField(FieldNames.IP.toString());
-		Integer occurence = addresses.get(ipAdress);
-		if(occurence == null){
-			occurence = 0;
-		}
-		occurence++;
-		this.addresses.put(ipAdress, occurence);
-		try {
-			Thread.sleep(60);
-		} catch (InterruptedException e) {
-			e.printStackTrace();
+		String eventType = input.getStringByField(FieldNames.EVTTYPE.toString());
+		
+		if(eventType.equalsIgnoreCase("view")){
+			Integer userID = input.getIntegerByField(FieldNames.USERID.toString());
+			Integer pageID = input.getIntegerByField(FieldNames.PGID.toString());
+			Integer adID = input.getIntegerByField(FieldNames.ADID.toString());
+			String adType = input.getStringByField(FieldNames.ADTYPE.toString());	
+			Integer eventTime = input.getIntegerByField(FieldNames.EVTTIME.toString());
+			String ipAddress = input.getStringByField(FieldNames.IP.toString());
+			
+			this.collector.emit(new Values(userID, pageID, adID, adType, eventType, eventTime, ipAddress));
 		}
 		this.collector.ack(input);
 	}
@@ -74,6 +71,7 @@ public class IPProcessor implements IRichBolt {
 	 */
 	@Override
 	public void declareOutputFields(OutputFieldsDeclarer declarer) {
+		declarer.declare(new Fields(FieldNames.USERID.toString(), FieldNames.PGID.toString(), FieldNames.ADID.toString(), FieldNames.ADTYPE.toString(), FieldNames.EVTTYPE.toString(), FieldNames.EVTTIME.toString(), FieldNames.IP.toString()));
 	}
 
 	/* (non-Javadoc)

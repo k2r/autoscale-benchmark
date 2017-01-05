@@ -1,7 +1,7 @@
 /**
  * 
  */
-package stormBench.stormBench.operator.bolt;
+package stormBench.stormBench.operator.bolt.advertising;
 
 import java.util.HashMap;
 import java.util.Map;

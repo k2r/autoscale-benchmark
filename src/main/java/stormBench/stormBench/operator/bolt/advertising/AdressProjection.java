@@ -1,7 +1,7 @@
 /**
  * 
  */
-package stormBench.stormBench.operator.bolt;
+package stormBench.stormBench.operator.bolt.advertising;
 
 import java.util.Map;
 
@@ -19,15 +19,16 @@ import stormBench.stormBench.utils.FieldNames;
  * @author Roland
  *
  */
-public class DeserializeBolt implements IRichBolt {
+public class AdressProjection implements IRichBolt {
 
+	
 	/**
 	 * 
 	 */
-	private static final long serialVersionUID = 1314812838594234494L;
+	private static final long serialVersionUID = -3052964951640824409L;
 	private OutputCollector collector;
 	
-	public DeserializeBolt() {
+	public AdressProjection() {
 	}
 	
 	/* (non-Javadoc)
@@ -44,21 +45,13 @@ public class DeserializeBolt implements IRichBolt {
 	 */
 	@Override
 	public void execute(Tuple input) {
-		String log = input.getStringByField(FieldNames.LOGS.toString());
-		String[] fields = log.split(";");
-		Integer userID = Integer.parseInt(fields[0]);
-		Integer pageID = Integer.parseInt(fields[1]);
-		Integer adID = Integer.parseInt(fields[2]);
-		String adType = fields[3];
-		String eventType = fields[4];
-		Integer eventTime = Integer.parseInt(fields[5]);
-		String ipAddress = fields[6];
+		String ipAddress = input.getStringByField(FieldNames.IP.toString());
+		this.collector.emit(new Values(ipAddress));
 		try {
-			Thread.sleep(1);
+			Thread.sleep(2);
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
-		this.collector.emit(new Values(userID, pageID, adID, adType, eventType, eventTime, ipAddress));
 		this.collector.ack(input);
 	}
 
@@ -74,7 +67,7 @@ public class DeserializeBolt implements IRichBolt {
 	 */
 	@Override
 	public void declareOutputFields(OutputFieldsDeclarer declarer) {
-		declarer.declare(new Fields(FieldNames.USERID.toString(), FieldNames.PGID.toString(), FieldNames.ADID.toString(), FieldNames.ADTYPE.toString(), FieldNames.EVTTYPE.toString(), FieldNames.EVTTIME.toString(), FieldNames.IP.toString()));
+		declarer.declare(new Fields(FieldNames.IP.toString()));
 	}
 
 	/* (non-Javadoc)

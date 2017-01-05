@@ -4,14 +4,15 @@ package stormBench.stormBench;
 import org.apache.storm.Config;
 import org.apache.storm.StormSubmitter;
 import org.apache.storm.topology.TopologyBuilder;
-import stormBench.stormBench.operator.bolt.AdressProjection;
-import stormBench.stormBench.operator.bolt.CampaignJoin;
-import stormBench.stormBench.operator.bolt.CampaignProcessor;
-import stormBench.stormBench.operator.bolt.DeserializeBolt;
-import stormBench.stormBench.operator.bolt.EventFilter;
-import stormBench.stormBench.operator.bolt.EventProjection;
-import stormBench.stormBench.operator.bolt.IPProcessor;
-import stormBench.stormBench.operator.spout.AdvertisingStreamSpout;
+
+import stormBench.stormBench.operator.bolt.advertising.AdressProjection;
+import stormBench.stormBench.operator.bolt.advertising.CampaignJoin;
+import stormBench.stormBench.operator.bolt.advertising.CampaignProcessor;
+import stormBench.stormBench.operator.bolt.advertising.DeserializeBolt;
+import stormBench.stormBench.operator.bolt.advertising.EventFilter;
+import stormBench.stormBench.operator.bolt.advertising.EventProjection;
+import stormBench.stormBench.operator.bolt.advertising.IPProcessor;
+import stormBench.stormBench.operator.spout.advertising.AdvertisingStreamSpout;
 import stormBench.stormBench.utils.FieldNames;
 import stormBench.stormBench.utils.XmlTopologyConfigParser;
 

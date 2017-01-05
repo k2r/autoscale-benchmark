@@ -1,7 +1,7 @@
 /**
  * 
  */
-package stormBench.stormBench.operator.spout;
+package stormBench.stormBench.operator.spout.radar;
 
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
@@ -17,7 +17,6 @@ import org.apache.storm.topology.OutputFieldsDeclarer;
 import org.apache.storm.tuple.Fields;
 import org.apache.storm.tuple.Values;
 import core.element.IElement;
-import core.element.element2.IElement2;
 import core.network.rmi.source.IRMIStreamSource;
 import stormBench.stormBench.utils.FieldNames;
 
@@ -57,7 +56,7 @@ public class StreamSimSpout implements IRichSpout {
 	 * of attributes describing each tuple. It allows to access attribute values through functions getFirstValue() to getFourthValue()
 	 * @return the last set of tuples sent by the stream source
 	 */
-	public IElement[] getInputStream(){
+	public IElement[] getInputStream(){//TODO adapt to MainRMIClient for transaction management
 		IElement[] input = new IElement[0];
 		try {
 			Registry registry = LocateRegistry.getRegistry(host, port);
@@ -153,9 +152,9 @@ public class StreamSimSpout implements IRichSpout {
 			}
 		}
 		if(this.receiveIndex > this.sendIndex){
-			IElement2 element = (IElement2) this.inputQueue.get(this.sendIndex);
-			Integer temperature = (Integer) element.getFirstValue();
-			Integer code = (Integer) element.getSecondValue();
+			IElement element = this.inputQueue.get(this.sendIndex);
+			Integer temperature = 0; //TODO
+			Integer code = 0; //TODO
 			String streamId = null;
 			switch(code){
 			case(1): 	streamId = FieldNames.LYON.toString();
@@ -188,9 +187,9 @@ public class StreamSimSpout implements IRichSpout {
 	@Override
 	public void fail(Object msgId) {
 		Integer id  = (Integer) msgId;
-		IElement2 element = (IElement2) this.inputQueue.get(id);
-		Integer temperature = (Integer) element.getFirstValue();
-		Integer code = (Integer) element.getSecondValue();
+		IElement element = this.inputQueue.get(id);
+		Integer temperature = 0;//TODO
+		Integer code = 0;//TODO
 		String streamId = null;
 		switch(code){
 		case(1): 	streamId = FieldNames.LYON.toString();

@@ -1,7 +1,7 @@
 /**
  * 
  */
-package stormBench.stormBench.operator.bolt;
+package stormBench.stormBench.operator.bolt.advertising;
 
 import java.util.Map;
 
@@ -19,7 +19,7 @@ import stormBench.stormBench.utils.FieldNames;
  * @author Roland
  *
  */
-public class AdressProjection implements IRichBolt {
+public class EventProjection implements IRichBolt {
 
 	
 	/**
@@ -28,7 +28,7 @@ public class AdressProjection implements IRichBolt {
 	private static final long serialVersionUID = -3052964951640824409L;
 	private OutputCollector collector;
 	
-	public AdressProjection() {
+	public EventProjection() {
 	}
 	
 	/* (non-Javadoc)
@@ -45,8 +45,9 @@ public class AdressProjection implements IRichBolt {
 	 */
 	@Override
 	public void execute(Tuple input) {
-		String ipAddress = input.getStringByField(FieldNames.IP.toString());
-		this.collector.emit(new Values(ipAddress));
+		Integer adID = input.getIntegerByField(FieldNames.ADID.toString());
+		Integer eventTime = input.getIntegerByField(FieldNames.EVTTIME.toString());
+		this.collector.emit(new Values(adID, eventTime));
 		try {
 			Thread.sleep(2);
 		} catch (InterruptedException e) {
@@ -67,7 +68,7 @@ public class AdressProjection implements IRichBolt {
 	 */
 	@Override
 	public void declareOutputFields(OutputFieldsDeclarer declarer) {
-		declarer.declare(new Fields(FieldNames.IP.toString()));
+		declarer.declare(new Fields(FieldNames.ADID.toString(), FieldNames.EVTTIME.toString()));
 	}
 
 	/* (non-Javadoc)

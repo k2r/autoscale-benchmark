@@ -1,7 +1,7 @@
 /**
  * 
  */
-package stormBench.stormBench.operator.spout;
+package stormBench.stormBench.operator.spout.elementary;
 
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;

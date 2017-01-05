@@ -5,9 +5,10 @@ import java.util.ArrayList;
 import org.apache.storm.Config;
 import org.apache.storm.StormSubmitter;
 import org.apache.storm.topology.TopologyBuilder;
-import stormBench.stormBench.operator.bolt.SleepBolt;
-import stormBench.stormBench.operator.bolt.LinearHeatwaveBolt;
-import stormBench.stormBench.operator.spout.SyntheticSpikeStreamSpout;
+
+import stormBench.stormBench.operator.bolt.elementary.LinearHeatwaveBolt;
+import stormBench.stormBench.operator.bolt.elementary.SleepBolt;
+import stormBench.stormBench.operator.spout.elementary.SyntheticSpikeStreamSpout;
 //import stormBench.stormBench.operator.spout.StreamSimSpout;
 import stormBench.stormBench.utils.FieldNames;
 import stormBench.stormBench.utils.XmlTopologyConfigParser;

@@ -1,14 +1,13 @@
 /**
  * 
  */
-package stormBench.stormBench.operator.spout;
+package stormBench.stormBench.operator.spout.elementary;
 
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Random;
 import java.util.logging.Logger;
 
 import org.apache.storm.spout.SpoutOutputCollector;
@@ -17,6 +16,7 @@ import org.apache.storm.topology.IRichSpout;
 import org.apache.storm.topology.OutputFieldsDeclarer;
 import org.apache.storm.tuple.Fields;
 import org.apache.storm.tuple.Values;
+
 import stormBench.stormBench.utils.FieldNames;
 import stormBench.stormBench.zookeeper.ZookeeperClient;
 
@@ -24,24 +24,33 @@ import stormBench.stormBench.zookeeper.ZookeeperClient;
  * @author Roland
  *
  */
-public class AdvertisingStreamSpout implements IRichSpout {
+public class SyntheticSpikeStreamSpout implements IRichSpout {
 
 	/**
 	 * 
 	 */
-	private static final long serialVersionUID = 2853429592252435680L;
-	private static Logger logger = Logger.getLogger("AdvertisingStreamSpout");
+	private static final long serialVersionUID = 6062533518525247588L;
+	private static Logger logger = Logger.getLogger("SyntheticSpikeStreamSpout");
 	private SpoutOutputCollector collector;
 	private int index;
 	private String stateHost;
 	private ZookeeperClient zkClient;
 	private HashMap<Integer, String> replayQueue;
 	
+	private ArrayList<Integer> codes = new ArrayList<>();
+	private String reference;
 	
-	public AdvertisingStreamSpout(String stateHost) {
+	public SyntheticSpikeStreamSpout(String stateHost, ArrayList<Integer> codes) {
 		this.stateHost = stateHost;
+		this.codes = codes;
+		this.reference = null;
 	}
-	
+
+	public SyntheticSpikeStreamSpout(String stateHost, ArrayList<Integer> codes, String reference) {
+		this.stateHost = stateHost;
+		this.codes = codes;
+		this.reference = reference;
+	}
 	/* (non-Javadoc)
 	 * @see org.apache.storm.spout.ISpout#open(java.util.Map, org.apache.storm.task.TopologyContext, org.apache.storm.spout.SpoutOutputCollector)
 	 */
@@ -82,7 +91,7 @@ public class AdvertisingStreamSpout implements IRichSpout {
 	 */
 	@Override
 	public void close() {
-		logger.fine("The advertising stream spout is shutting down....");
+		logger.fine("The spike stream spout is shutting down....");
 	}
 
 	/* (non-Javadoc)
@@ -90,7 +99,7 @@ public class AdvertisingStreamSpout implements IRichSpout {
 	 */
 	@Override
 	public void activate() {
-		logger.fine("The advertising stream spout is starting....");
+		logger.fine("The spike stream spout is starting....");
 	}
 
 	/* (non-Javadoc)
@@ -98,48 +107,34 @@ public class AdvertisingStreamSpout implements IRichSpout {
 	 */
 	@Override
 	public void deactivate() {
-		logger.fine("The advertising stream spout is being deactivated....");
+		logger.fine("The spike stream spout is being deactivated....");
 	}
 
 	public String generateTuple(){
-		String log = "";
-		Random random = new Random();
-		
-		Integer userID = random.nextInt(1000);
-		Integer pageID = random.nextInt(200);
-		Integer adID = random.nextInt(3000);
-		
-		ArrayList<String> adTypes = new ArrayList<>();
-		adTypes.add("image");
-		adTypes.add("video");
-		adTypes.add("header");
-		adTypes.add("footer");
-		Integer adIndex = random.nextInt(4);
-		String adType = adTypes.get(adIndex);
-		
-		ArrayList<String> eventTypes = new ArrayList<>();
-		eventTypes.add("view");
-		eventTypes.add("click");
-		eventTypes.add("hover");
-		Integer eventIndex = random.nextInt(3);
-		String eventType = eventTypes.get(eventIndex);
-		
-		Integer eventTime = random.nextInt(10000);
-		
-		String ipAddress = "192.168.";
-		Integer ipComplement1 = random.nextInt(80);
-		Integer ipComplement2 = random.nextInt(150) + 50;
-		ipAddress += ipComplement1 + "." + ipComplement2;
-		
-		
-		log += userID + ";" + pageID + ";" + adID + ";" + adType + ";" + eventType + ";" + eventTime + ";" + ipAddress + ";";
-		return log;
+		int size = this.codes.size();
+		int codeIndex = this.index % size; 
+		int code =  this.codes.get(codeIndex);
+		String streamId = "";
+		switch(code){
+		case(0): 	streamId = FieldNames.LYON.toString();
+		break;
+		case(1): 	streamId = FieldNames.VILLEUR.toString();
+		break;
+		case(2):	streamId = FieldNames.VAULX.toString();
+		break;
+		}
+		return streamId;
 	}
 	
 	public void emitNewTuple(){
-		String streamId = FieldNames.LOGS.toString();
-		String log = generateTuple();
-		this.collector.emit(streamId, new Values(log), this.index);
+		String streamId = generateTuple();
+		if(this.reference != null){
+			if(streamId.equalsIgnoreCase(this.reference)){
+				this.collector.emit(streamId, new Values(35), this.index);
+			}
+		}else{
+			this.collector.emit(streamId, new Values(35), this.index);
+		}
 		this.replayQueue.put(this.index, streamId);
 		this.index++;
 		String state = this.index + "";
@@ -153,32 +148,23 @@ public class AdvertisingStreamSpout implements IRichSpout {
 	 */
 	@Override
 	public void nextTuple() {
-		if(this.index < 18000){
+		if(this.index < 14000){
 			Long lastEmission = Long.parseLong(new String(this.zkClient.getDate()));
 			Long now = System.currentTimeMillis();
 			Long interval = now - lastEmission;
 			if(this.index < 600 && interval >= 250){
 				emitNewTuple();
 			}
-			if(this.index >= 600 && this.index < 1800 && interval >= 100){
+			if(this.index >= 600 && this.index < 6600 && interval >= 1){
 				emitNewTuple();
 			}
-			if(this.index >= 1800 && this.index < 3000 && interval >= 50){
+			if(this.index >= 6600 && this.index < 7200 && interval >= 250){
 				emitNewTuple();
 			}
-			if(this.index >= 3000 && this.index < 6000 && interval >= 20){
+			if(this.index >= 7200 && this.index < 13200 && interval >= 1){
 				emitNewTuple();
 			}
-			if(this.index >= 6000 && this.index < 12000 && interval >= 1){
-				emitNewTuple();
-			}
-			if(this.index >= 12000 && this.index < 15000 && interval >= 20){
-				emitNewTuple();
-			}
-			if(this.index >= 15000 && this.index < 16200 && interval >= 50){
-				emitNewTuple();
-			}
-			if(this.index >= 16200 && this.index < 18000 && interval >= 250){
+			if(this.index >= 13200 && this.index < 14000 && interval >= 250){
 				emitNewTuple();
 			}
 		}else{
@@ -204,13 +190,15 @@ public class AdvertisingStreamSpout implements IRichSpout {
 		String streamId = this.replayQueue.get(id);
 		this.collector.emit(streamId, new Values(35), id);
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.apache.storm.topology.IComponent#declareOutputFields(org.apache.storm.topology.OutputFieldsDeclarer)
 	 */
 	@Override
 	public void declareOutputFields(OutputFieldsDeclarer declarer) {
-		declarer.declareStream(FieldNames.LOGS.toString(), new Fields(FieldNames.LOGS.toString()));
+		declarer.declareStream(FieldNames.LYON.toString(), new Fields(FieldNames.TEMPERATURE.toString()));
+		declarer.declareStream(FieldNames.VILLEUR.toString(), new Fields(FieldNames.TEMPERATURE.toString()));
+		declarer.declareStream(FieldNames.VAULX.toString(), new Fields(FieldNames.TEMPERATURE.toString()));
 	}
 
 	/* (non-Javadoc)
@@ -220,4 +208,5 @@ public class AdvertisingStreamSpout implements IRichSpout {
 	public Map<String, Object> getComponentConfiguration() {
 		return null;
 	}
+
 }

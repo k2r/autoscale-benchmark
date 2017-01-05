@@ -1,7 +1,7 @@
 /**
  * 
  */
-package stormBench.stormBench.operator.bolt;
+package stormBench.stormBench.operator.bolt.radar;
 
 import java.util.Map;
 
@@ -15,26 +15,21 @@ import org.apache.storm.tuple.Tuple;
  * @author Roland
  *
  */
-public class SleepBolt implements IRichBolt {
+public class CarMakeProjector implements IRichBolt {
 
 	/**
 	 * 
 	 */
-	private static final long serialVersionUID = 2109073700105983429L;
-	private int sleepTime;
-	private OutputCollector collector;
-	
-	public SleepBolt(int duration) {
-		this.sleepTime = duration;
-	}
-	
+	private static final long serialVersionUID = -4893487724162145615L;
+
 	/* (non-Javadoc)
 	 * @see org.apache.storm.task.IBolt#prepare(java.util.Map, org.apache.storm.task.TopologyContext, org.apache.storm.task.OutputCollector)
 	 */
 	@SuppressWarnings("rawtypes")
 	@Override
 	public void prepare(Map stormConf, TopologyContext context, OutputCollector collector) {
-		this.collector = collector;
+		// TODO Auto-generated method stub
+
 	}
 
 	/* (non-Javadoc)
@@ -42,12 +37,8 @@ public class SleepBolt implements IRichBolt {
 	 */
 	@Override
 	public void execute(Tuple input) {
-		try {
-			Thread.sleep(this.sleepTime);
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
-		this.collector.ack(input);
+		// TODO Auto-generated method stub
+
 	}
 
 	/* (non-Javadoc)
@@ -55,6 +46,8 @@ public class SleepBolt implements IRichBolt {
 	 */
 	@Override
 	public void cleanup() {
+		// TODO Auto-generated method stub
+
 	}
 
 	/* (non-Javadoc)
@@ -62,6 +55,8 @@ public class SleepBolt implements IRichBolt {
 	 */
 	@Override
 	public void declareOutputFields(OutputFieldsDeclarer declarer) {
+		// TODO Auto-generated method stub
+
 	}
 
 	/* (non-Javadoc)
@@ -69,6 +64,7 @@ public class SleepBolt implements IRichBolt {
 	 */
 	@Override
 	public Map<String, Object> getComponentConfiguration() {
+		// TODO Auto-generated method stub
 		return null;
 	}
 

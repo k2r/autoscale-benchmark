@@ -1,7 +1,7 @@
 /**
  * 
  */
-package stormBench.stormBench.operator;
+package stormBench.stormBench.operator.meta;
 
 import java.io.Serializable;
 import java.util.Collection;
