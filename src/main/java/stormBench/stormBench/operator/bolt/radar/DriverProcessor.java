@@ -3,8 +3,10 @@
  */
 package stormBench.stormBench.operator.bolt.radar;
 
+import java.rmi.RemoteException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.logging.Logger;
 
 import org.apache.storm.task.OutputCollector;
 import org.apache.storm.task.TopologyContext;
@@ -12,7 +14,9 @@ import org.apache.storm.topology.IRichBolt;
 import org.apache.storm.topology.OutputFieldsDeclarer;
 import org.apache.storm.tuple.Tuple;
 
+import stormBench.stormBench.rmi.RMIInfoSource;
 import stormBench.stormBench.utils.FieldNames;
+import stormBench.stormBench.utils.Utils;
 
 /**
  * @author Roland
@@ -27,6 +31,18 @@ public class DriverProcessor implements IRichBolt {
 
 	private OutputCollector collector;
 	private HashMap<String, Integer> violationCounts;
+
+	private RMIInfoSource source;
+	
+	public static Logger logger = Logger.getLogger("DriverProcessor");
+	
+	public DriverProcessor(Integer port) {
+		try {
+			this.source = new RMIInfoSource(port);
+		} catch (RemoteException e) {
+			logger.severe("Unable to initialize the rmi source because " + e);
+		}
+	}
 	
 	/* (non-Javadoc)
 	 * @see org.apache.storm.task.IBolt#prepare(java.util.Map, org.apache.storm.task.TopologyContext, org.apache.storm.task.OutputCollector)
@@ -50,6 +66,8 @@ public class DriverProcessor implements IRichBolt {
 		Integer vcount = this.violationCounts.get(driver);
 		vcount++;
 		this.violationCounts.put(driver, vcount);
+		this.source.setInfo(Utils.convertToInfo(this.violationCounts));
+		this.source.cast();
 		this.collector.ack(input);
 	}
 

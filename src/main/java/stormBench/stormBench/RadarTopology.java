@@ -54,7 +54,7 @@ public class RadarTopology {
         .setCPULoad(10.0)
         .setMemoryLoad(32.0);
         
-        builder.setBolt("carMakeProcessor", new CarMakeProcessor(), sinkNbExecutors).setNumTasks(nbTasks)
+        builder.setBolt("carMakeProcessor", new CarMakeProcessor(5350), sinkNbExecutors).setNumTasks(nbTasks)
         .shuffleGrouping("carMakeProjector")
         .setCPULoad(10.0)
         .setMemoryLoad(32.0);
@@ -69,7 +69,7 @@ public class RadarTopology {
         .setCPULoad(10.0)
         .setMemoryLoad(32.0);
         
-        builder.setBolt("locationProcessor", new LocationProcessor(), sinkNbExecutors).setNumTasks(nbTasks)
+        builder.setBolt("locationProcessor", new LocationProcessor(5351), sinkNbExecutors).setNumTasks(nbTasks)
         .shuffleGrouping("speedLimitFilter")
         .setCPULoad(10.0)
         .setMemoryLoad(32.0);
@@ -79,7 +79,7 @@ public class RadarTopology {
         .setCPULoad(10.0)
         .setMemoryLoad(32.0);
         
-        builder.setBolt("driverProcessor", new DriverProcessor(), sinkNbExecutors).setNumTasks(nbTasks)
+        builder.setBolt("driverProcessor", new DriverProcessor(5352), sinkNbExecutors).setNumTasks(nbTasks)
         .shuffleGrouping("registrationProcessor")
         .setCPULoad(10.0)
         .setMemoryLoad(32.0);
