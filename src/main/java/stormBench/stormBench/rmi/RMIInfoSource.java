@@ -3,6 +3,7 @@
  */
 package stormBench.stormBench.rmi;
 
+import java.rmi.NoSuchObjectException;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
@@ -47,6 +48,14 @@ public class RMIInfoSource extends UnicastRemoteObject {
 			registry.rebind("info", this);
 		} catch (RemoteException e) {
 			logger.info("Server unable to bind the remote object");	
+		}
+	}
+	
+	public void releaseRegistry(){
+		try {
+			UnicastRemoteObject.unexportObject(registry, true);
+		} catch (NoSuchObjectException e) {
+			logger.severe("There is no registry to release on given host/port");
 		}
 	}
 }

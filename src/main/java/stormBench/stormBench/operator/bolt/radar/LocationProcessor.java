@@ -76,6 +76,7 @@ public class LocationProcessor implements IRichBolt {
 	 */
 	@Override
 	public void cleanup() {
+		this.source.releaseRegistry();
 	}
 
 	/* (non-Javadoc)
