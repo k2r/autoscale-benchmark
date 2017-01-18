@@ -31,19 +31,16 @@ public class CarMakeProcessor implements IRichBolt {
 	
 	private OutputCollector collector;
 	private HashMap<String, Integer> counts;
-	
-	//private RMIInfoSource source;
+	private Integer port;
+	private RMIInfoSource source;
 	
 	public static Logger logger = Logger.getLogger("CarMakeProcessor");
 
 	
 	public CarMakeProcessor(Integer port){
-		//try {
-		//	this.source = new RMIInfoSource(port);
-		//} catch (RemoteException e) {
-		//	logger.severe("Unable to initialize the rmi source because " + e);
-		//}
+		this.port = port;
 	}
+	
 	/* (non-Javadoc)
 	 * @see org.apache.storm.task.IBolt#prepare(java.util.Map, org.apache.storm.task.TopologyContext, org.apache.storm.task.OutputCollector)
 	 */
@@ -52,6 +49,11 @@ public class CarMakeProcessor implements IRichBolt {
 	public void prepare(Map stormConf, TopologyContext context, OutputCollector collector) {
 		this.collector = collector;
 		this.counts = new HashMap<>();
+		try {
+			this.source = new RMIInfoSource(port);
+		} catch (RemoteException e) {
+			System.out.println("Unable to initialize the rmi source because " + e);
+		}
 	}
 
 	/* (non-Javadoc)
@@ -66,8 +68,8 @@ public class CarMakeProcessor implements IRichBolt {
 		Integer count = this.counts.get(make);
 		count++;
 		this.counts.put(make, count);
-		//this.source.setInfo(Utils.convertToInfo(this.counts));
-		//this.source.cast();
+		this.source.setInfo(Utils.convertToInfo(this.counts));
+		this.source.cast();
 		this.collector.ack(input);
 	}
 
@@ -76,7 +78,11 @@ public class CarMakeProcessor implements IRichBolt {
 	 */
 	@Override
 	public void cleanup() {
-		//this.source.releaseRegistry();
+		try {
+			this.source.releaseRegistry();
+		} catch (RemoteException e) {
+			logger.severe("Unable to release the stream source because " + e);
+		}
 	}
 
 	/* (non-Javadoc)

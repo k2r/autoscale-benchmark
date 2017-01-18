@@ -38,7 +38,6 @@ public class RadarTopology {
 		
 		int nbTasks = Integer.parseInt(parameters.getNbTasks());
 		int interNbExecutors = Integer.parseInt(parameters.getInterNbExecutors());
-		int sinkNbExecutors = Integer.parseInt(parameters.getSinkNbExecutors());
 		
 		String streamHost = parameters.getSgHost();
 		Integer streamPort = Integer.parseInt(parameters.getSgPort());
@@ -54,7 +53,7 @@ public class RadarTopology {
         .setCPULoad(10.0)
         .setMemoryLoad(32.0);
         
-        builder.setBolt("carMakeProcessor", new CarMakeProcessor(5350), sinkNbExecutors).setNumTasks(nbTasks)
+        builder.setBolt("carMakeProcessor", new CarMakeProcessor(5380))
         .shuffleGrouping("carMakeProjector")
         .setCPULoad(10.0)
         .setMemoryLoad(32.0);
@@ -69,7 +68,7 @@ public class RadarTopology {
         .setCPULoad(10.0)
         .setMemoryLoad(32.0);
         
-        builder.setBolt("locationProcessor", new LocationProcessor(5351), sinkNbExecutors).setNumTasks(nbTasks)
+        builder.setBolt("locationProcessor", new LocationProcessor(5381))
         .shuffleGrouping("speedLimitFilter")
         .setCPULoad(10.0)
         .setMemoryLoad(32.0);
@@ -79,7 +78,7 @@ public class RadarTopology {
         .setCPULoad(10.0)
         .setMemoryLoad(32.0);
         
-        builder.setBolt("driverProcessor", new DriverProcessor(5352), sinkNbExecutors).setNumTasks(nbTasks)
+        builder.setBolt("driverProcessor", new DriverProcessor(5382))
         .shuffleGrouping("registrationProcessor")
         .setCPULoad(10.0)
         .setMemoryLoad(32.0);

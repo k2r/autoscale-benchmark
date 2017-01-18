@@ -32,16 +32,13 @@ public class LocationProcessor implements IRichBolt {
 	private OutputCollector collector;
 	private HashMap<String, Integer> violationCounts;
 	
-	//private RMIInfoSource source;
+	private RMIInfoSource source;
+	private Integer port;
 	
 	public static Logger logger = Logger.getLogger("LocationProcessor");
 	
 	public LocationProcessor(Integer port) {
-		/*try {
-			this.source = new RMIInfoSource(port);
-		} catch (RemoteException e) {
-			logger.severe("Unable to initialize the rmi source because " + e);
-		}*/
+		this.port = port;
 	}
 	
 	/* (non-Javadoc)
@@ -52,6 +49,11 @@ public class LocationProcessor implements IRichBolt {
 	public void prepare(Map stormConf, TopologyContext context, OutputCollector collector) {
 		this.collector = collector;
 		this.violationCounts = new HashMap<>();
+		try {
+			this.source = new RMIInfoSource(port);
+		} catch (RemoteException e) {
+			System.out.println("Unable to initialize the rmi source because " + e);
+		}
 	}
 
 	/* (non-Javadoc)
@@ -66,8 +68,8 @@ public class LocationProcessor implements IRichBolt {
 		Integer vcount = this.violationCounts.get(location);
 		vcount++;
 		this.violationCounts.put(location, vcount);
-		//this.source.setInfo(Utils.convertToInfo(this.violationCounts));
-		//this.source.cast();
+		this.source.setInfo(Utils.convertToInfo(this.violationCounts));
+		this.source.cast();
 		this.collector.ack(input);
 	}
 
@@ -76,7 +78,11 @@ public class LocationProcessor implements IRichBolt {
 	 */
 	@Override
 	public void cleanup() {
-		//this.source.releaseRegistry();
+		try {
+			this.source.releaseRegistry();
+		} catch (RemoteException e) {
+			logger.severe("Unable to release the stream source because " + e);
+		}
 	}
 
 	/* (non-Javadoc)
