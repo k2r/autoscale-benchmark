@@ -28,6 +28,7 @@ public class RadarTopology {
 	 */
 	public static void main(String[] args) throws Exception{
 		
+		
 		/**
 		 * Setting of execution parameters
 		 */
@@ -41,6 +42,7 @@ public class RadarTopology {
 		
 		String streamHost = parameters.getSgHost();
 		Integer streamPort = Integer.parseInt(parameters.getSgPort());
+		
 		
 		StreamSimSpout radarSpout = new StreamSimSpout(streamHost, streamPort);
 		

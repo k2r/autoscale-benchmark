@@ -61,7 +61,7 @@ public class RegistrationProcessor implements IRichBolt {
 		if(driver != null){
 			this.collector.emit(new Values(driver));
 			try {
-				Thread.sleep(80);
+				Thread.sleep(60);
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
