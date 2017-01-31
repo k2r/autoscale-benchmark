@@ -39,7 +39,7 @@ public class SocketSource implements Serializable{
 			DataOutputStream out = new DataOutputStream(this.client.getOutputStream());
 			int length = batch.size();
 			for(int i = 0; i < length; i++){
-				out.writeUTF(batch.get(i));				
+				out.writeUTF(batch.get(i) + "\n");				
 			}
 			out.flush();
 		} catch (IOException e) {
