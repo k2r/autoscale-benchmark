@@ -30,7 +30,8 @@ public enum FieldNames {
 	MAKE("make"),
 	COLOR("color"),
 	LOC("location"),
-	DRIVER("driver");
+	DRIVER("driver"),
+	VALUE("value");
 	
 
 	private String name = "";

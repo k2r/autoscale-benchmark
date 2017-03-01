@@ -9,7 +9,7 @@ import org.apache.storm.topology.TopologyBuilder;
 
 import mw16.lsg.storm.OSGCustomGrouping;
 import stormBench.stormBench.operator.bolt.osg.KeySensitiveBolt;
-import stormBench.stormBench.operator.spout.osg.ZipfIntegerSpout;
+import stormBench.stormBench.operator.spout.osg.StreamSimSpout;
 
 /**
  * @author Roland
@@ -24,21 +24,23 @@ public class OSGTestTopology {
 	public static void main(String[] args) throws Exception {
 
 		String command = args[0];
+		String host = args[1];
+		int port = Integer.parseInt(args[2]);
 		/**
 		 * Declaration of the OSG test topology
 		 */
 		TopologyBuilder builder = new TopologyBuilder();
 
-		builder.setSpout("zipfIntegerGenerator", new ZipfIntegerSpout(4096, 1.5), 1).setCPULoad(5).setMemoryLoad(256);
+		builder.setSpout("streamsimSpout", new StreamSimSpout(host, port), 1).setCPULoad(5).setMemoryLoad(256);
 		
 		if(command.equalsIgnoreCase("osg")){
 			builder.setBolt("keySensitiveBolt", new KeySensitiveBolt(64, 1.5), 1)
-			.setNumTasks(16).setCPULoad(20).setMemoryLoad(128).customGrouping("zipfIntegerGenerator", new OSGCustomGrouping(10000019L, 0.05, 0.05));
+			.setNumTasks(16).setCPULoad(20).setMemoryLoad(128).customGrouping("streamsimSpout", new OSGCustomGrouping(10000019L, 0.05, 0.05));
 		}
 		
 		if(command.equalsIgnoreCase("shuffle")){
 			builder.setBolt("keySensitiveBolt", new KeySensitiveBolt(64, 1.5), 1)
-			.setNumTasks(16).setCPULoad(20).setMemoryLoad(128).shuffleGrouping("zipfIntegerGenerator");
+			.setNumTasks(16).setCPULoad(20).setMemoryLoad(128).shuffleGrouping("streamsimSpout");
 		}
 		
 		Config config = new Config();
