@@ -31,6 +31,10 @@ public class XmlTopologyConfigParser {
 	private String nbTasks;
 	private String interNbExecutors;
 	private String sinkNbExecutors;
+	private String interCpuConstraint;
+	private String sinkCpuConstraint;
+	private String interMemConstraint;
+	private String sinkMemConstraint;
 	private String dbHost;
 	private String windowSize;
 	private String windowStep;
@@ -150,6 +154,62 @@ public class XmlTopologyConfigParser {
 		this.sinkNbExecutors = nbExecutors;
 	}
 	
+	/**
+	 * @return the interCpuConstraint
+	 */
+	public String getInterCpuConstraint() {
+		return interCpuConstraint;
+	}
+
+	/**
+	 * @param interCpuConstraint the interCpuConstraint to set
+	 */
+	public void setInterCpuConstraint(String interCpuConstraint) {
+		this.interCpuConstraint = interCpuConstraint;
+	}
+
+	/**
+	 * @return the sinkCpuConstraint
+	 */
+	public String getSinkCpuConstraint() {
+		return sinkCpuConstraint;
+	}
+
+	/**
+	 * @param sinkCpuConstraint the sinkCpuConstraint to set
+	 */
+	public void setSinkCpuConstraint(String sinkCpuConstraint) {
+		this.sinkCpuConstraint = sinkCpuConstraint;
+	}
+
+	/**
+	 * @return the interMemConstraint
+	 */
+	public String getInterMemConstraint() {
+		return interMemConstraint;
+	}
+
+	/**
+	 * @param interMemConstraint the interMemConstraint to set
+	 */
+	public void setInterMemConstraint(String interMemConstraint) {
+		this.interMemConstraint = interMemConstraint;
+	}
+
+	/**
+	 * @return the sinkMemConstraint
+	 */
+	public String getSinkMemConstraint() {
+		return sinkMemConstraint;
+	}
+
+	/**
+	 * @param sinkMemConstraint the sinkMemConstraint to set
+	 */
+	public void setSinkMemConstraint(String sinkMemConstraint) {
+		this.sinkMemConstraint = sinkMemConstraint;
+	}
+
 	public String getStateHost(){
 		return this.dbHost;
 	}
@@ -201,6 +261,14 @@ public class XmlTopologyConfigParser {
 		this.setInterNbExecutors(interNbexecutors.item(0).getTextContent());
 		final NodeList sinkNbexecutors = parameters.getElementsByTagName(TopologyConfigNodeNames.SINKNBEXECS.toString());
 		this.setSinkNbExecutors(sinkNbexecutors.item(0).getTextContent());
+		final NodeList interCpuConstraint = parameters.getElementsByTagName(TopologyConfigNodeNames.INTERCPU.toString());
+		this.setInterCpuConstraint(interCpuConstraint.item(0).getTextContent());
+		final NodeList sinkCpuConstraint = parameters.getElementsByTagName(TopologyConfigNodeNames.SINKCPU.toString());
+		this.setSinkCpuConstraint(sinkCpuConstraint.item(0).getTextContent());
+		final NodeList interMemConstraint = parameters.getElementsByTagName(TopologyConfigNodeNames.INTERMEM.toString());
+		this.setInterMemConstraint(interMemConstraint.item(0).getTextContent());
+		final NodeList sinkMemConstraint = parameters.getElementsByTagName(TopologyConfigNodeNames.SINKMEM.toString());
+		this.setSinkMemConstraint(sinkMemConstraint.item(0).getTextContent());
 		final NodeList dbhost = parameters.getElementsByTagName(TopologyConfigNodeNames.STATEHOST.toString());
 		this.setDbHost(dbhost.item(0).getTextContent());
 		final NodeList size = parameters.getElementsByTagName(TopologyConfigNodeNames.SIZE.toString());

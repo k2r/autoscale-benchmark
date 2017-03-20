@@ -29,6 +29,10 @@ public class LinearTopologySpike {
 		int nbTasks = Integer.parseInt(parameters.getNbTasks());
 		int interNbExecutors = Integer.parseInt(parameters.getInterNbExecutors());
 		int sinkNbExecutors = Integer.parseInt(parameters.getSinkNbExecutors());
+		Double interCpuConstraint = Double.parseDouble(parameters.getInterCpuConstraint());
+		Double sinkCpuConstraint = Double.parseDouble(parameters.getSinkCpuConstraint());
+		Double interMemConstraint = Double.parseDouble(parameters.getInterMemConstraint());
+		Double sinkMemConstraint = Double.parseDouble(parameters.getSinkMemConstraint());
 		
     	/**
     	 * Declaration of source and sink components
@@ -51,21 +55,21 @@ public class LinearTopologySpike {
         .shuffleGrouping(FieldNames.SOURCE.toString(), FieldNames.LYON.toString())
         .shuffleGrouping(FieldNames.SOURCE.toString(), FieldNames.VILLEUR.toString())
         .shuffleGrouping(FieldNames.SOURCE.toString(), FieldNames.VAULX.toString())
-        .setCPULoad(20.0)
-        .setMemoryLoad(256.0);
+        .setCPULoad(interCpuConstraint)
+        .setMemoryLoad(interMemConstraint);
         
         builder.setBolt(FieldNames.SINK.toString(), new SleepBolt(80), sinkNbExecutors).setNumTasks(nbTasks)
         .shuffleGrouping(FieldNames.INTER.toString(), FieldNames.LYON.toString())
         .shuffleGrouping(FieldNames.INTER.toString(), FieldNames.VILLEUR.toString())
         .shuffleGrouping(FieldNames.INTER.toString(), FieldNames.VAULX.toString())
-        .setCPULoad(80.0)
-        .setMemoryLoad(512.0);
+        .setCPULoad(sinkCpuConstraint)
+        .setMemoryLoad(sinkMemConstraint);
         
         /**
          * Configuration of metadata of the topology
          */
         Config config = new Config();
-        config.setNumAckers(8);
+        config.setNumAckers(2);
         config.setNumWorkers(24);
 		
 		/**
