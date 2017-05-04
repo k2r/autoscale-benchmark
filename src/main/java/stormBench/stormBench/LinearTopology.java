@@ -32,6 +32,8 @@ public class LinearTopology {
 		Double sinkCpuConstraint = Double.parseDouble(parameters.getSinkCpuConstraint());
 		Double interMemConstraint = Double.parseDouble(parameters.getInterMemConstraint());
 		Double sinkMemConstraint = Double.parseDouble(parameters.getSinkMemConstraint());
+		Integer nbAckers = Integer.parseInt(parameters.getNbAckers());
+		Integer nbWorkers = Integer.parseInt(parameters.getNbWorkers());
 		
     	/**
     	 * Declaration of source and sink components
@@ -48,7 +50,7 @@ public class LinearTopology {
          */
         TopologyBuilder builder = new TopologyBuilder();
         
-        builder.setSpout(FieldNames.SOURCE.toString(), spout).setCPULoad(10.0).setMemoryLoad(64.0);
+        builder.setSpout(FieldNames.SOURCE.toString(), spout).setCPULoad(20.0).setMemoryLoad(512.0);
         
         builder.setBolt(FieldNames.INTER.toString(), new LinearHeatwaveBolt(), interNbExecutors).setNumTasks(nbTasks)
         .shuffleGrouping(FieldNames.SOURCE.toString(), FieldNames.LYON.toString())
@@ -68,8 +70,8 @@ public class LinearTopology {
          * Configuration of metadata of the topology
          */
         Config config = new Config();
-        config.setNumAckers(2);
-        config.setNumWorkers(24);
+        config.setNumAckers(nbAckers);
+        config.setNumWorkers(nbWorkers);
 		
 		/**
 		 * Call to the topology submitter for storm

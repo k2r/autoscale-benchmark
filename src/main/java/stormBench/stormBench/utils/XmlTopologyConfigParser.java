@@ -35,6 +35,8 @@ public class XmlTopologyConfigParser {
 	private String sinkCpuConstraint;
 	private String interMemConstraint;
 	private String sinkMemConstraint;
+	private String nbAckers;
+	private String nbWorkers;
 	private String dbHost;
 	private String windowSize;
 	private String windowStep;
@@ -210,6 +212,34 @@ public class XmlTopologyConfigParser {
 		this.sinkMemConstraint = sinkMemConstraint;
 	}
 
+	/**
+	 * @return the nbAckers
+	 */
+	public String getNbAckers() {
+		return nbAckers;
+	}
+
+	/**
+	 * @param nbAckers the nbAckers to set
+	 */
+	public void setNbAckers(String nbAckers) {
+		this.nbAckers = nbAckers;
+	}
+
+	/**
+	 * @return the nbWorkers
+	 */
+	public String getNbWorkers() {
+		return nbWorkers;
+	}
+
+	/**
+	 * @param nbWorkers the nbWorkers to set
+	 */
+	public void setNbWorkers(String nbWorkers) {
+		this.nbWorkers = nbWorkers;
+	}
+
 	public String getStateHost(){
 		return this.dbHost;
 	}
@@ -269,6 +299,10 @@ public class XmlTopologyConfigParser {
 		this.setInterMemConstraint(interMemConstraint.item(0).getTextContent());
 		final NodeList sinkMemConstraint = parameters.getElementsByTagName(TopologyConfigNodeNames.SINKMEM.toString());
 		this.setSinkMemConstraint(sinkMemConstraint.item(0).getTextContent());
+		final NodeList nbAckers = parameters.getElementsByTagName(TopologyConfigNodeNames.NBACKERS.toString());
+		this.setNbAckers(nbAckers.item(0).getTextContent());
+		final NodeList nbWorkers = parameters.getElementsByTagName(TopologyConfigNodeNames.NBWORKERS.toString());
+		this.setNbWorkers(nbWorkers.item(0).getTextContent());
 		final NodeList dbhost = parameters.getElementsByTagName(TopologyConfigNodeNames.STATEHOST.toString());
 		this.setDbHost(dbhost.item(0).getTextContent());
 		final NodeList size = parameters.getElementsByTagName(TopologyConfigNodeNames.SIZE.toString());

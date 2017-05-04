@@ -17,6 +17,8 @@ public enum TopologyConfigNodeNames {
 	SINKCPU("sink_cpu_constraint"),
 	INTERMEM("intermediate_mem_constraint"),
 	SINKMEM("sink_mem_constraint"),
+	NBACKERS("nb_ackers"),
+	NBWORKERS("nb_workers"),
 	STATEHOST("state_host"),
 	SIZE("window_size"),
 	STEP("window_step");
