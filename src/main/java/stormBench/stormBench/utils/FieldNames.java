@@ -31,7 +31,13 @@ public enum FieldNames {
 	COLOR("color"),
 	LOC("location"),
 	DRIVER("driver"),
-	VALUE("value");
+	VALUE("value"),
+	OPINION("opinion"),
+	AGE("age"),
+	CATAGE("age_category"),
+	NORMCITY("normalized_city"),
+	PERCENT("percentage"),
+	NAME("name");
 	
 
 	private String name = "";
