@@ -3,10 +3,14 @@
  */
 package stormBench.stormBench.operator.bolt.opinion;
 
-import java.util.ArrayList;
-import java.util.HashMap;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
+import java.util.Arrays;
 import java.util.Map;
-import java.util.Set;
 import java.util.logging.Logger;
 
 import org.apache.storm.task.OutputCollector;
@@ -15,7 +19,6 @@ import org.apache.storm.topology.IRichBolt;
 import org.apache.storm.topology.OutputFieldsDeclarer;
 import org.apache.storm.tuple.Tuple;
 
-import stormBench.stormBench.socket.SocketSource;
 import stormBench.stormBench.utils.FieldNames;
 
 /**
@@ -31,15 +34,6 @@ public class OpinionAnalyzer implements IRichBolt {
 	private static Logger logger = Logger.getLogger("OpinionAnalyzer");
 	private OutputCollector collector;
 	
-	private Integer port;
-	private SocketSource source;
-	private HashMap<String, HashMap<String, Double>> dominantCategories;//opinion -> age category -> percentage
-	private HashMap<String, HashMap<String, Double>> dominantCities;//opinion -> city -> percentage
-	
-
-	public OpinionAnalyzer(Integer port) {
-		this.port = port;
-	}
 	
 	/* (non-Javadoc)
 	 * @see org.apache.storm.task.IBolt#prepare(java.util.Map, org.apache.storm.task.TopologyContext, org.apache.storm.task.OutputCollector)
@@ -48,9 +42,6 @@ public class OpinionAnalyzer implements IRichBolt {
 	@Override
 	public void prepare(Map stormConf, TopologyContext context, OutputCollector collector) {
 		this.collector = collector;
-		this.source = new SocketSource(this.port);
-		this.dominantCategories = new HashMap<>();
-		this.dominantCities = new HashMap<>();
 	}
 
 	/* (non-Javadoc)
@@ -62,53 +53,27 @@ public class OpinionAnalyzer implements IRichBolt {
 		if(stream.equalsIgnoreCase(FieldNames.CATAGE.toString())){
 			String category = input.getStringByField(FieldNames.CATAGE.toString());
 			String opinion = input.getStringByField(FieldNames.OPINION.toString());
-			Double percent = input.getDoubleByField(FieldNames.PERCENT.toString());
-			boolean isMax = true;
-			if(dominantCategories.containsKey(opinion)){
-				HashMap<String, Double> categories = dominantCategories.get(opinion);
-				Set<String> keySet = categories.keySet();
-				for(String key : keySet){
-					Double currentMax = categories.get(key);
-					if(currentMax >= percent){
-						isMax = false;
-						break;
-					}
-				}
-				if(isMax){
-					HashMap<String, Double> newMaxCategory = new HashMap<>();
-					newMaxCategory.put(category, percent);
-					dominantCategories.put(opinion, newMaxCategory);
-					ArrayList<String> batch = new ArrayList<>();
-					String info = "Opinion " + opinion + " is correlated to age in " + category + " (" + percent + "%)"; 
-					batch.add(info);
-					this.source.sendBatch(batch);
-				}
+			Double confidence = input.getDoubleByField(FieldNames.CONFIDENCE.toString());	
+			
+			String info = "Opinion " + opinion + " is implied by age in " + category + " (confidence = " + confidence + ")";
+			Path output = Paths.get("opinion.txt");
+			try {
+				Files.write(output, Arrays.asList(info), StandardCharsets.UTF_8, StandardOpenOption.CREATE, StandardOpenOption.APPEND);
+			} catch (IOException e) {
+				logger.severe("Unable to log opinion mine results because " + e);
 			}
 		}
 		if(stream.equalsIgnoreCase(FieldNames.NORMCITY.toString())){
 			String city = input.getStringByField(FieldNames.NORMCITY.toString());
 			String opinion = input.getStringByField(FieldNames.OPINION.toString());
-			Double percent = input.getDoubleByField(FieldNames.PERCENT.toString());
-			boolean isMax = true;
-			if(dominantCities.containsKey(opinion)){
-				HashMap<String, Double> cities = dominantCities.get(opinion);
-				Set<String> keySet = cities.keySet();
-				for(String key : keySet){
-					Double currentMax = cities.get(key);
-					if(currentMax >= percent){
-						isMax = false;
-						break;
-					}
-				}
-				if(isMax){
-					HashMap<String, Double> newMaxCity = new HashMap<>();
-					newMaxCity.put(city, percent);
-					dominantCities.put(opinion, newMaxCity);
-					ArrayList<String> batch = new ArrayList<>();
-					String info = "Opinion " + opinion + " is correlated to city '" + city + "' (" + percent + "%)"; 
-					batch.add(info);
-					this.source.sendBatch(batch);
-				}
+			Double confidence = input.getDoubleByField(FieldNames.CONFIDENCE.toString());
+			
+			String info = "Opinion " + opinion + " is implied by city '" + city + "' (confidence = " + confidence + ")"; 
+			Path output = Paths.get("opinion.txt");
+			try {
+				Files.write(output, Arrays.asList(info), StandardCharsets.UTF_8, StandardOpenOption.CREATE, StandardOpenOption.APPEND);
+			} catch (IOException e) {
+				logger.severe("Unable to log opinion mine results because " + e);
 			}
 		}
 		this.collector.ack(input);

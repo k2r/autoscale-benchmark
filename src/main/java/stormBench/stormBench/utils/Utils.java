@@ -21,4 +21,17 @@ public class Utils {
 		}
 		return results;
 	}
+	
+	public static <T, U extends Number> T getMaxCategory(HashMap<T, U> values){
+		T maxCategory = null;
+		Double maxValue = 0.0;
+		for(T category : values.keySet()){
+			U value = values.get(category);
+			if(Math.abs(value.doubleValue()) > Math.abs(maxValue.doubleValue())){
+				maxCategory = category;
+				maxValue = value.doubleValue();
+			}
+		}
+		return maxCategory;
+	}
 }

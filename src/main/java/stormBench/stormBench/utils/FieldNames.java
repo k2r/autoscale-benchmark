@@ -36,7 +36,7 @@ public enum FieldNames {
 	AGE("age"),
 	CATAGE("age_category"),
 	NORMCITY("normalized_city"),
-	PERCENT("percentage"),
+	CONFIDENCE("confidence"),
 	NAME("name");
 	
 

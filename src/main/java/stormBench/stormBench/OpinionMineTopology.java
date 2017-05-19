@@ -34,6 +34,7 @@ public class OpinionMineTopology {
 		XmlTopologyConfigParser parameters = new XmlTopologyConfigParser("topParameters.xml");
 		parameters.initParameters();
 		
+		Integer streamPort = Integer.parseInt(parameters.getSgPort());
 		String stateHost = parameters.getStateHost();
 		String topId = parameters.getTopId();
 		
@@ -52,7 +53,7 @@ public class OpinionMineTopology {
          */
         TopologyBuilder builder = new TopologyBuilder();
         
-        StreamSimSpout spout = new StreamSimSpout(stateHost, 5390);
+        StreamSimSpout spout = new StreamSimSpout(stateHost, streamPort);
         
         builder.setSpout("OpinionSource", spout, 1).setCPULoad(20).setMemoryLoad(512);
         
@@ -68,15 +69,15 @@ public class OpinionMineTopology {
         .setCPULoad(sinkCpuConstraint).setMemoryLoad(sinkMemConstraint).setNumTasks(nbTasks)
         .shuffleGrouping("CategoryDispatcher", FieldNames.CITY.toString());
         
-        builder.setBolt("AgeAnalyzer", new AgeAnalyzer(), interNbExecutors)
+        builder.setBolt("AgeAnalyzer", new AgeAnalyzer(100), interNbExecutors)
         .setCPULoad(interCpuConstraint).setMemoryLoad(interMemConstraint).setNumTasks(nbTasks)
         .shuffleGrouping("AgeNormalizer");
         
-        builder.setBolt("CityAnalyzer", new CityAnalyzer(), interNbExecutors)
+        builder.setBolt("CityAnalyzer", new CityAnalyzer(100), interNbExecutors)
         .setCPULoad(interCpuConstraint).setMemoryLoad(interMemConstraint).setNumTasks(nbTasks)
         .shuffleGrouping("CityNormalizer");
         
-        builder.setBolt("OpinionAnalyzer", new OpinionAnalyzer(5391), sinkNbExecutors)
+        builder.setBolt("OpinionAnalyzer", new OpinionAnalyzer(), sinkNbExecutors)
         .setCPULoad(sinkCpuConstraint).setMemoryLoad(sinkMemConstraint).setNumTasks(nbTasks)
         .shuffleGrouping("AgeAnalyzer", FieldNames.CATAGE.toString())
         .shuffleGrouping("CityAnalyzer", FieldNames.NORMCITY.toString());
