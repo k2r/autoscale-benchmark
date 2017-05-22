@@ -53,7 +53,7 @@ public class StreamSimSpout implements IRichSpout {
 					if(resources[i].equalsIgnoreCase("tuples")){
 						IRMIStreamSource stub = (IRMIStreamSource) registry.lookup("tuples");
 						input = stub.getInputStream();
-						registry.unbind("tuples");
+						//registry.unbind("tuples");
 						break;
 					}
 				}
@@ -78,7 +78,7 @@ public class StreamSimSpout implements IRichSpout {
 
 	@Override
 	public void activate() {
-		logger.info("StreamSimSpout " + StreamSimSpout.serialVersionUID + " is being activated.");
+		logger.info("StreamSimSpout " + StreamSimSpout.serialVersionUID + " is being activated. Listening to host " + this.host + " port " + this.port + "...");
 	}
 
 	@Override
