@@ -26,6 +26,7 @@ public class StreamSimSpout implements IRichSpout {
 	private static Logger logger = Logger.getLogger("StreamSimSpout");
 	private String host;
 	private int port;
+	private int counter;
 	private HashMap<Integer, IElement> inputQueue;
 	private Integer sendIndex;
 	private Integer receiveIndex;
@@ -37,6 +38,7 @@ public class StreamSimSpout implements IRichSpout {
 	public StreamSimSpout(String host, int port) {
 		this.host = host;
 		this.port = port;
+		this.counter = 0;
 		this.inputQueue = new HashMap<>();
 		this.sendIndex = 0;
 		this.receiveIndex = 0;
@@ -52,8 +54,11 @@ public class StreamSimSpout implements IRichSpout {
 				for(int i = 0; i < n; i++){
 					if(resources[i].equalsIgnoreCase("tuples")){
 						IRMIStreamSource stub = (IRMIStreamSource) registry.lookup("tuples");
-						input = stub.getInputStream();
-						//registry.unbind("tuples");
+						int chunkCounter = stub.getChunkCounter();
+						if(chunkCounter > this.counter){
+							this.counter++;
+							input = stub.getInputStream();
+						}
 						break;
 					}
 				}
@@ -95,12 +100,6 @@ public class StreamSimSpout implements IRichSpout {
 				this.inputQueue.put(receiveIndex, input[i]);
 				receiveIndex++;
 			}
-		}else{
-			try {
-				Thread.sleep(1);
-			} catch (InterruptedException e) {
-				logger.severe("StreamSimSpout can not sleep because of " + e);
-			}
 		}
 		if(this.receiveIndex > this.sendIndex){
 			IElement element = this.inputQueue.get(this.sendIndex);
@@ -112,6 +111,12 @@ public class StreamSimSpout implements IRichSpout {
 			
 			this.collector.emit(new Values(name, age, city, opinion), this.sendIndex);
 			this.sendIndex++;
+		}else{
+			try {
+				Thread.sleep(1);
+			} catch (InterruptedException e) {
+				logger.severe("StreamSimSpout can not sleep because of " + e);
+			}
 		}
 	}
 
