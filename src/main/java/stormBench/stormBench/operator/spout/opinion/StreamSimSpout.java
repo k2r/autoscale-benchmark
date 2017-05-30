@@ -101,7 +101,7 @@ public class StreamSimSpout implements IRichSpout {
 				receiveIndex++;
 			}
 		}
-		if(this.receiveIndex > this.sendIndex){
+		while(this.receiveIndex > this.sendIndex){
 			IElement element = this.inputQueue.get(this.sendIndex);
 			Object[] values = element.getValues();
 			String name = (String) values[0];
@@ -111,12 +111,11 @@ public class StreamSimSpout implements IRichSpout {
 			
 			this.collector.emit(new Values(name, age, city, opinion), this.sendIndex);
 			this.sendIndex++;
-		}else{
-			try {
-				Thread.sleep(1);
-			} catch (InterruptedException e) {
-				logger.severe("StreamSimSpout can not sleep because of " + e);
-			}
+		}
+		try {
+			Thread.sleep(1);
+		} catch (InterruptedException e) {
+			logger.severe("StreamSimSpout can not sleep because of " + e);
 		}
 	}
 

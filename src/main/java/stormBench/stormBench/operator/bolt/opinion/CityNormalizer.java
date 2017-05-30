@@ -77,7 +77,7 @@ public class CityNormalizer implements IRichBolt {
 	public String normalizedCity(String code){
 		String normCity = "";	
 		try {
-			Thread.sleep(10);
+			Thread.sleep(5);
 			switch(code){
 			case("NY"): normCity += "New York, USA";
 			break;
