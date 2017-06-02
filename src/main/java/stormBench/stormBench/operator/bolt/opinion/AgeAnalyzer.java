@@ -63,6 +63,7 @@ public class AgeAnalyzer implements IRichBolt {
 	public void execute(Tuple input) {
 		String category = input.getStringByField(FieldNames.CATAGE.toString());
 		String opinion = input.getStringByField(FieldNames.OPINION.toString());
+		
 		if(this.index < this.sampleSize){
 			/*if the sample is not significant so it is enriched with the new tuple*/
 			if(!this.ages.contains(category)){
@@ -119,9 +120,9 @@ public class AgeAnalyzer implements IRichBolt {
 				String bestCategory = Utils.getMaxCategory(confidenceMap);
 				Double bestConfidence = confidenceMap.get(bestCategory);
 				this.collector.emit(FieldNames.CATAGE.toString(), input, new Values(bestCategory, knownOpinion, bestConfidence));
-			}			
+			}
+			this.collector.ack(input);
 		}
-		this.collector.ack(input);
 	}
 
 	/* (non-Javadoc)

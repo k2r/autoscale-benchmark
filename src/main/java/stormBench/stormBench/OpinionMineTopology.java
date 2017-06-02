@@ -69,12 +69,12 @@ public class OpinionMineTopology {
         .setCPULoad(sinkCpuConstraint).setMemoryLoad(sinkMemConstraint).setNumTasks(nbTasks)
         .shuffleGrouping("CategoryDispatcher", FieldNames.CITY.toString());
         
-        builder.setBolt("AgeAnalyzer", new AgeAnalyzer(100), interNbExecutors)
-        .setCPULoad(interCpuConstraint).setMemoryLoad(interMemConstraint).setNumTasks(nbTasks)
+        builder.setBolt("AgeAnalyzer", new AgeAnalyzer(50), interNbExecutors)
+        .setCPULoad(interCpuConstraint).setMemoryLoad(sinkMemConstraint).setNumTasks(nbTasks)
         .shuffleGrouping("AgeNormalizer");
         
-        builder.setBolt("CityAnalyzer", new CityAnalyzer(100), interNbExecutors)
-        .setCPULoad(interCpuConstraint).setMemoryLoad(interMemConstraint).setNumTasks(nbTasks)
+        builder.setBolt("CityAnalyzer", new CityAnalyzer(50), interNbExecutors)
+        .setCPULoad(interCpuConstraint).setMemoryLoad(sinkMemConstraint).setNumTasks(nbTasks)
         .shuffleGrouping("CityNormalizer");
         
         builder.setBolt("OpinionAnalyzer", new OpinionAnalyzer(), sinkNbExecutors)

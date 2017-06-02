@@ -64,8 +64,7 @@ public class StreamSimSpout implements IRichSpout {
 				}
 			}
 		}catch(Exception e){
-			logger.severe("Client exception: " + e.toString());
-			e.printStackTrace();
+			logger.info("No registry found at host " + host + " port " + port);
 		}
 		return input;
 	}
@@ -101,7 +100,7 @@ public class StreamSimSpout implements IRichSpout {
 				receiveIndex++;
 			}
 		}
-		while(this.receiveIndex > this.sendIndex){
+		if(this.receiveIndex > this.sendIndex){
 			IElement element = this.inputQueue.get(this.sendIndex);
 			Object[] values = element.getValues();
 			String name = (String) values[0];
@@ -111,12 +110,13 @@ public class StreamSimSpout implements IRichSpout {
 			
 			this.collector.emit(new Values(name, age, city, opinion), this.sendIndex);
 			this.sendIndex++;
-		}
-		try {
-			Thread.sleep(1);
-		} catch (InterruptedException e) {
-			logger.severe("StreamSimSpout can not sleep because of " + e);
-		}
+		}else{
+			try{
+				Thread.sleep(1);
+			}catch (InterruptedException e) {
+				logger.severe("StreamSimSpout can not sleep because of " + e);
+			}
+		} 
 	}
 
 	@Override
