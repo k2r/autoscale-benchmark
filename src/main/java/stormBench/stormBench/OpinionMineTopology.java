@@ -13,7 +13,7 @@ import stormBench.stormBench.operator.bolt.opinion.CategoryDispatcher;
 import stormBench.stormBench.operator.bolt.opinion.CityAnalyzer;
 import stormBench.stormBench.operator.bolt.opinion.CityNormalizer;
 import stormBench.stormBench.operator.bolt.opinion.OpinionAnalyzer;
-import stormBench.stormBench.operator.spout.opinion.StreamSimSpout;
+import stormBench.stormBench.operator.spout.opinion.SyntheticStreamSpout;
 import stormBench.stormBench.utils.FieldNames;
 import stormBench.stormBench.utils.XmlTopologyConfigParser;
 
@@ -34,7 +34,6 @@ public class OpinionMineTopology {
 		XmlTopologyConfigParser parameters = new XmlTopologyConfigParser("topParameters.xml");
 		parameters.initParameters();
 		
-		Integer streamPort = Integer.parseInt(parameters.getSgPort());
 		String stateHost = parameters.getStateHost();
 		String topId = parameters.getTopId();
 		
@@ -53,7 +52,7 @@ public class OpinionMineTopology {
          */
         TopologyBuilder builder = new TopologyBuilder();
         
-        StreamSimSpout spout = new StreamSimSpout(stateHost, streamPort);
+        SyntheticStreamSpout spout = new SyntheticStreamSpout(stateHost);
         
         builder.setSpout("OpinionSource", spout, 1).setCPULoad(20).setMemoryLoad(512);
         
@@ -69,11 +68,11 @@ public class OpinionMineTopology {
         .setCPULoad(sinkCpuConstraint).setMemoryLoad(sinkMemConstraint).setNumTasks(nbTasks)
         .shuffleGrouping("CategoryDispatcher", FieldNames.CITY.toString());
         
-        builder.setBolt("AgeAnalyzer", new AgeAnalyzer(50), interNbExecutors)
+        builder.setBolt("AgeAnalyzer", new AgeAnalyzer(10), interNbExecutors)
         .setCPULoad(interCpuConstraint).setMemoryLoad(sinkMemConstraint).setNumTasks(nbTasks)
         .shuffleGrouping("AgeNormalizer");
         
-        builder.setBolt("CityAnalyzer", new CityAnalyzer(50), interNbExecutors)
+        builder.setBolt("CityAnalyzer", new CityAnalyzer(10), interNbExecutors)
         .setCPULoad(interCpuConstraint).setMemoryLoad(sinkMemConstraint).setNumTasks(nbTasks)
         .shuffleGrouping("CityNormalizer");
         
