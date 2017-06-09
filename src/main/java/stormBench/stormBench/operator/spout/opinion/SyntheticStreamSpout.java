@@ -108,7 +108,7 @@ public class SyntheticStreamSpout implements IRichSpout {
 	}
 	
 	public void emitNewTuple(){
-		Random rand = new Random(49991);//a great prime number for reproductibility
+		Random rand = new Random(49991);//a seed (random great prime number) for reproductibility
 		String name = "anonymous_user";
 		Integer age = rand.nextInt(60) + 16;
 		int nbCities = 10;

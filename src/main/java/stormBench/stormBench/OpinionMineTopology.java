@@ -7,6 +7,7 @@ import org.apache.storm.Config;
 import org.apache.storm.StormSubmitter;
 import org.apache.storm.topology.TopologyBuilder;
 
+import mw16.lsg.storm.OSGCustomGrouping;
 import stormBench.stormBench.operator.bolt.opinion.AgeAnalyzer;
 import stormBench.stormBench.operator.bolt.opinion.AgeNormalizer;
 import stormBench.stormBench.operator.bolt.opinion.CategoryDispatcher;
@@ -28,6 +29,9 @@ public class OpinionMineTopology {
 	 * @param args
 	 */
 	public static void main(String[] args) throws Exception {
+		
+		String command = args[0];
+		
 		/**
 		 * Setting of execution parameters
 		 */
@@ -53,34 +57,62 @@ public class OpinionMineTopology {
         TopologyBuilder builder = new TopologyBuilder();
         
         SyntheticStreamSpout spout = new SyntheticStreamSpout(stateHost);
-        
+       
         builder.setSpout("OpinionSource", spout, 1).setCPULoad(20).setMemoryLoad(512);
         
-        builder.setBolt("CategoryDispatcher", new CategoryDispatcher(), interNbExecutors)
-        .setCPULoad(interCpuConstraint).setMemoryLoad(interMemConstraint).setNumTasks(nbTasks)
-        .shuffleGrouping("OpinionSource");
+        if(command.equalsIgnoreCase("shuffle")){
+        	builder.setBolt("CategoryDispatcher", new CategoryDispatcher(), interNbExecutors)
+        	.setCPULoad(interCpuConstraint).setMemoryLoad(interMemConstraint).setNumTasks(nbTasks)
+        	.shuffleGrouping("OpinionSource");
+
+        	builder.setBolt("AgeNormalizer", new AgeNormalizer(), interNbExecutors)
+        	.setCPULoad(interCpuConstraint).setMemoryLoad(interMemConstraint).setNumTasks(nbTasks)
+        	.shuffleGrouping("CategoryDispatcher", FieldNames.AGE.toString());
+
+        	builder.setBolt("CityNormalizer", new CityNormalizer(), sinkNbExecutors)
+        	.setCPULoad(sinkCpuConstraint).setMemoryLoad(sinkMemConstraint).setNumTasks(nbTasks)
+        	.shuffleGrouping("CategoryDispatcher", FieldNames.CITY.toString());
+
+        	builder.setBolt("AgeAnalyzer", new AgeAnalyzer(100), interNbExecutors)
+        	.setCPULoad(interCpuConstraint).setMemoryLoad(sinkMemConstraint).setNumTasks(nbTasks)
+        	.shuffleGrouping("AgeNormalizer");
+
+        	builder.setBolt("CityAnalyzer", new CityAnalyzer(100), interNbExecutors)
+        	.setCPULoad(interCpuConstraint).setMemoryLoad(sinkMemConstraint).setNumTasks(nbTasks)
+        	.shuffleGrouping("CityNormalizer");
+
+        	builder.setBolt("OpinionAnalyzer", new OpinionAnalyzer(), sinkNbExecutors)
+        	.setCPULoad(sinkCpuConstraint).setMemoryLoad(sinkMemConstraint).setNumTasks(nbTasks)
+        	.shuffleGrouping("AgeAnalyzer", FieldNames.CATAGE.toString())
+        	.shuffleGrouping("CityAnalyzer", FieldNames.NORMCITY.toString());
+        }
         
-        builder.setBolt("AgeNormalizer", new AgeNormalizer(), interNbExecutors)
-        .setCPULoad(interCpuConstraint).setMemoryLoad(interMemConstraint).setNumTasks(nbTasks)
-        .shuffleGrouping("CategoryDispatcher", FieldNames.AGE.toString());
-        
-        builder.setBolt("CityNormalizer", new CityNormalizer(), sinkNbExecutors)
-        .setCPULoad(sinkCpuConstraint).setMemoryLoad(sinkMemConstraint).setNumTasks(nbTasks)
-        .shuffleGrouping("CategoryDispatcher", FieldNames.CITY.toString());
-        
-        builder.setBolt("AgeAnalyzer", new AgeAnalyzer(10), interNbExecutors)
-        .setCPULoad(interCpuConstraint).setMemoryLoad(sinkMemConstraint).setNumTasks(nbTasks)
-        .shuffleGrouping("AgeNormalizer");
-        
-        builder.setBolt("CityAnalyzer", new CityAnalyzer(10), interNbExecutors)
-        .setCPULoad(interCpuConstraint).setMemoryLoad(sinkMemConstraint).setNumTasks(nbTasks)
-        .shuffleGrouping("CityNormalizer");
-        
-        builder.setBolt("OpinionAnalyzer", new OpinionAnalyzer(), sinkNbExecutors)
-        .setCPULoad(sinkCpuConstraint).setMemoryLoad(sinkMemConstraint).setNumTasks(nbTasks)
-        .shuffleGrouping("AgeAnalyzer", FieldNames.CATAGE.toString())
-        .shuffleGrouping("CityAnalyzer", FieldNames.NORMCITY.toString());
-        
+        if(command.equalsIgnoreCase("osg")){
+            builder.setBolt("CategoryDispatcher", new CategoryDispatcher(), interNbExecutors)
+            .setCPULoad(interCpuConstraint).setMemoryLoad(interMemConstraint).setNumTasks(nbTasks)
+            .customGrouping("OpinionSource", new OSGCustomGrouping(49991L, 0.05, 0.05));
+            
+            builder.setBolt("AgeNormalizer", new AgeNormalizer(), interNbExecutors)
+            .setCPULoad(interCpuConstraint).setMemoryLoad(interMemConstraint).setNumTasks(nbTasks)
+            .customGrouping("CategoryDispatcher",FieldNames.AGE.toString(), new OSGCustomGrouping(49991L, 0.05, 0.05));
+            
+            builder.setBolt("CityNormalizer", new CityNormalizer(), sinkNbExecutors)
+            .setCPULoad(sinkCpuConstraint).setMemoryLoad(sinkMemConstraint).setNumTasks(nbTasks)
+            .customGrouping("CategoryDispatcher", FieldNames.CITY.toString(), new OSGCustomGrouping(49991L, 0.05, 0.05));
+            
+            builder.setBolt("AgeAnalyzer", new AgeAnalyzer(100), interNbExecutors)
+            .setCPULoad(interCpuConstraint).setMemoryLoad(sinkMemConstraint).setNumTasks(nbTasks)
+            .customGrouping("AgeNormalizer", new OSGCustomGrouping(49991L, 0.05, 0.05));
+            
+            builder.setBolt("CityAnalyzer", new CityAnalyzer(100), interNbExecutors)
+            .setCPULoad(interCpuConstraint).setMemoryLoad(sinkMemConstraint).setNumTasks(nbTasks)
+            .customGrouping("CityNormalizer", new OSGCustomGrouping(49991L, 0.05, 0.05));
+            
+            builder.setBolt("OpinionAnalyzer", new OpinionAnalyzer(), sinkNbExecutors)
+            .setCPULoad(sinkCpuConstraint).setMemoryLoad(sinkMemConstraint).setNumTasks(nbTasks)
+            .customGrouping("AgeAnalyzer", FieldNames.CATAGE.toString(), new OSGCustomGrouping(49991L, 0.05, 0.05))
+            .customGrouping("CityAnalyzer", FieldNames.NORMCITY.toString(), new OSGCustomGrouping(49991L, 0.05, 0.05));
+        }
         /**
          * Configuration of metadata of the topology
          */
