@@ -30,7 +30,15 @@ public class OpinionMineTopology {
 	 */
 	public static void main(String[] args) throws Exception {
 		
-		String command = args[0];
+		Integer stream = Integer.parseInt(args[0]);
+		String grouping = args[1];
+		String distribution = args[2];
+		Double skew = 1.0;
+		if(args[3] != null){
+			skew = Double.parseDouble(args[3]);
+		}
+		
+		
 		
 		/**
 		 * Setting of execution parameters
@@ -56,11 +64,11 @@ public class OpinionMineTopology {
          */
         TopologyBuilder builder = new TopologyBuilder();
         
-        SyntheticStreamSpout spout = new SyntheticStreamSpout(stateHost);
+        SyntheticStreamSpout spout = new SyntheticStreamSpout(stream, stateHost, distribution, skew);
        
         builder.setSpout("OpinionSource", spout, 1).setCPULoad(20).setMemoryLoad(512);
         
-        if(command.equalsIgnoreCase("shuffle")){
+        if(grouping.equalsIgnoreCase("shuffle")){
         	builder.setBolt("CategoryDispatcher", new CategoryDispatcher(), interNbExecutors)
         	.setCPULoad(interCpuConstraint).setMemoryLoad(interMemConstraint).setNumTasks(nbTasks)
         	.shuffleGrouping("OpinionSource");
@@ -87,7 +95,7 @@ public class OpinionMineTopology {
         	.shuffleGrouping("CityAnalyzer", FieldNames.NORMCITY.toString());
         }
         
-        if(command.equalsIgnoreCase("osg")){
+        if(grouping.equalsIgnoreCase("osg")){
             builder.setBolt("CategoryDispatcher", new CategoryDispatcher(), interNbExecutors)
             .setCPULoad(interCpuConstraint).setMemoryLoad(interMemConstraint).setNumTasks(nbTasks)
             .customGrouping("OpinionSource", new OSGCustomGrouping(49991L, 0.05, 0.05));

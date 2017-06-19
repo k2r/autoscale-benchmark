@@ -9,9 +9,10 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
 import java.util.logging.Logger;
 
+import org.apache.commons.math3.distribution.ZipfDistribution;
+import org.apache.commons.math3.random.JDKRandomGenerator;
 import org.apache.storm.spout.SpoutOutputCollector;
 import org.apache.storm.task.TopologyContext;
 import org.apache.storm.topology.IRichSpout;
@@ -34,6 +35,7 @@ public class SyntheticStreamSpout implements IRichSpout {
 	private static final long serialVersionUID = 5273393035109120451L;
 	private static Logger logger = Logger.getLogger("SyntheticStreamSpout");
 	private SpoutOutputCollector collector;
+	private int stream;
 	private int index;
 	private String stateHost;
 	private ZookeeperClient zkClient;
@@ -41,11 +43,24 @@ public class SyntheticStreamSpout implements IRichSpout {
 	
 	private List<String> cities;
 	private List<String> opinions;
+	private String distribution;
+	private Double skew;
+	private JDKRandomGenerator generator;
+	private ZipfDistribution zipfAge;
+	private ZipfDistribution zipfCity;
+	private ZipfDistribution zipfOpinion;
 	
-	public SyntheticStreamSpout(String stateHost) {
+	public SyntheticStreamSpout(Integer stream, String stateHost, String distribution, Double skew) {
 		this.stateHost = stateHost;
+		this.stream = stream;
 		this.cities = Arrays.asList("NY", "TKY", "PAR", "BER", "MAD", "TAC", "LIS", "ROM", "BRA", "SYD");
 		this.opinions = Arrays.asList("very negative", "negative", "neutral", "positive", "very positive");
+		this.distribution = distribution;
+		this.skew = skew;
+		this.generator = new JDKRandomGenerator(49991);//a seed (random great prime number) for reproductibility
+		this.zipfAge = new ZipfDistribution(generator, 60, this.skew);
+		this.zipfCity = new ZipfDistribution(generator, this.cities.size() - 1, this.skew);
+		this.zipfOpinion = new ZipfDistribution(generator, this.opinions.size() -1 , this.skew);
 	}
 	
 	/* (non-Javadoc)
@@ -108,13 +123,21 @@ public class SyntheticStreamSpout implements IRichSpout {
 	}
 	
 	public void emitNewTuple(){
-		Random rand = new Random(49991);//a seed (random great prime number) for reproductibility
 		String name = "anonymous_user";
-		Integer age = rand.nextInt(60) + 16;
-		int nbCities = 10;
-		String city = this.cities.get(rand.nextInt(nbCities));
-		int nbOpinions = 5;
-		String opinion = this.opinions.get(rand.nextInt(nbOpinions));
+		Integer age =  16;
+		String city = "";
+		String opinion = "";
+		
+		if(this.distribution.equalsIgnoreCase("uniform")){
+			age += generator.nextInt(60);
+			city += this.cities.get(generator.nextInt(this.cities.size()));
+			opinion += this.opinions.get(generator.nextInt(this.opinions.size()));
+		}
+		if(this.distribution.equalsIgnoreCase("zipf")){
+			age += zipfAge.sample();
+			city += this.cities.get(zipfCity.sample());
+			opinion += this.opinions.get(zipfOpinion.sample());
+		}
 		this.collector.emit(new Values(name, age, city, opinion), this.index);
 		String tupleAsString = name + ";" + age + ";" + city + ";" + opinion;
 		this.replayQueue.put(this.index, tupleAsString);
@@ -130,36 +153,118 @@ public class SyntheticStreamSpout implements IRichSpout {
 	 */
 	@Override
 	public void nextTuple() {
-		if(this.index < 18000){
-			Long lastEmission = Long.parseLong(new String(this.zkClient.getDate()));
-			Long now = System.currentTimeMillis();
-			Long interval = now - lastEmission;
-			if(this.index < 600 && interval >= 250){
-				emitNewTuple();
+		if(this.stream == 1){
+			if(this.index < 18000){
+				Long lastEmission = Long.parseLong(new String(this.zkClient.getDate()));
+				Long now = System.currentTimeMillis();
+				Long interval = now - lastEmission;
+				if(this.index < 600 && interval >= 250){
+					emitNewTuple();
+				}
+				if(this.index >= 600 && this.index < 1800 && interval >= 100){
+					emitNewTuple();
+				}
+				if(this.index >= 1800 && this.index < 3000 && interval >= 50){
+					emitNewTuple();
+				}
+				if(this.index >= 3000 && this.index < 6000 && interval >= 20){
+					emitNewTuple();
+				}
+				if(this.index >= 6000 && this.index < 12000 && interval >= 1){
+					emitNewTuple();
+				}
+				if(this.index >= 12000 && this.index < 15000 && interval >= 20){
+					emitNewTuple();
+				}
+				if(this.index >= 15000 && this.index < 16200 && interval >= 50){
+					emitNewTuple();
+				}
+				if(this.index >= 16200 && this.index < 18000 && interval >= 250){
+					emitNewTuple();
+				}
+			}else{
+				System.out.println("End of test stream!");
 			}
-			if(this.index >= 600 && this.index < 1800 && interval >= 100){
-				emitNewTuple();
+		}
+		
+		if(this.stream == 2){
+			if(this.index < 18000){
+				Long lastEmission = Long.parseLong(new String(this.zkClient.getDate()));
+				Long now = System.currentTimeMillis();
+				Long interval = now - lastEmission;
+				if(this.index < 600 && interval >= 250){
+					emitNewTuple();
+				}
+				if(this.index >= 600 && this.index < 1800 && interval >= 100){
+					emitNewTuple();
+				}
+				if(this.index >= 1800 && this.index < 3000 && interval >= 50){
+					emitNewTuple();
+				}
+				if(this.index >= 3000 && this.index < 6000 && interval >= 20){
+					emitNewTuple();
+				}
+				if(this.index >= 6000 && this.index < 10000 && interval >= 1){
+					emitNewTuple();
+				}
+				if(this.index >= 10000 && this.index < 13000 && interval >= 20){
+					emitNewTuple();
+				}
+				if(this.index >= 13000 && this.index < 14000 && interval >= 50){
+					emitNewTuple();
+				}
+				if(this.index >= 14000 && this.index < 14500 && interval >= 100){
+					emitNewTuple();
+				}
+				if(this.index >= 14500 && this.index < 15000 && interval >= 250){
+					emitNewTuple();
+				}
+				if(this.index >= 15000 && this.index < 16500 && interval >= 1){
+					emitNewTuple();
+				}
+				if(this.index >= 16500 && this.index < 18000 && interval >= 250){
+					emitNewTuple();
+				}
+			}else{
+				System.out.println("End of test stream!");
 			}
-			if(this.index >= 1800 && this.index < 3000 && interval >= 50){
-				emitNewTuple();
+		}
+		
+		if(this.stream == 3){
+			if(this.index < 21600){
+				Long lastEmission = Long.parseLong(new String(this.zkClient.getDate()));
+				Long now = System.currentTimeMillis();
+				Long interval = now - lastEmission;
+				if(this.index < 720 && interval >= 250){
+					emitNewTuple();
+				}
+				if(this.index >= 720 && this.index < 4720 && interval >= 1){
+					emitNewTuple();
+				}
+				if(this.index >= 4720 && this.index < 5440 && interval >= 250){
+					emitNewTuple();
+				}
+				if(this.index >= 5440 && this.index < 9440 && interval >= 1){
+					emitNewTuple();
+				}
+				if(this.index >= 9440 && this.index < 10160 && interval >= 250){
+					emitNewTuple();
+				}
+				if(this.index >= 10160 && this.index < 15160 && interval >= 1){
+					emitNewTuple();
+				}
+				if(this.index >= 15160 && this.index < 15880 && interval >= 250){
+					emitNewTuple();
+				}
+				if(this.index >= 15880 && this.index < 20880 && interval >= 1){
+					emitNewTuple();
+				}
+				if(this.index >= 20880 && this.index < 21600 && interval >= 250){
+					emitNewTuple();
+				}
+			}else{
+				System.out.println("End of test stream!");
 			}
-			if(this.index >= 3000 && this.index < 6000 && interval >= 20){
-				emitNewTuple();
-			}
-			if(this.index >= 6000 && this.index < 12000 && interval >= 1){
-				emitNewTuple();
-			}
-			if(this.index >= 12000 && this.index < 15000 && interval >= 20){
-				emitNewTuple();
-			}
-			if(this.index >= 15000 && this.index < 16200 && interval >= 50){
-				emitNewTuple();
-			}
-			if(this.index >= 16200 && this.index < 18000 && interval >= 250){
-				emitNewTuple();
-			}
-		}else{
-			System.out.println("End of test stream!");
 		}
 	}
 
