@@ -188,41 +188,35 @@ public class SyntheticStreamSpout implements IRichSpout {
 		}
 		
 		if(this.stream == 2){
-			if(this.index < 18000){
+			if(this.index < 22000){
 				Long lastEmission = Long.parseLong(new String(this.zkClient.getDate()));
 				Long now = System.currentTimeMillis();
 				Long interval = now - lastEmission;
 				if(this.index < 600 && interval >= 250){
 					emitNewTuple();
 				}
-				if(this.index >= 600 && this.index < 1800 && interval >= 100){
+				if(this.index >= 600 && this.index < 1600 && interval >= 150){
 					emitNewTuple();
 				}
-				if(this.index >= 1800 && this.index < 3000 && interval >= 50){
+				if(this.index >= 1600 && this.index < 4100 && interval >= 50){
 					emitNewTuple();
 				}
-				if(this.index >= 3000 && this.index < 6000 && interval >= 20){
+				if(this.index >= 4100 && this.index < 12100 && interval >= 10){
 					emitNewTuple();
 				}
-				if(this.index >= 6000 && this.index < 10000 && interval >= 1){
+				if(this.index >= 12100 && this.index < 13100 && interval >= 1){
 					emitNewTuple();
 				}
-				if(this.index >= 10000 && this.index < 13000 && interval >= 20){
+				if(this.index >= 13100 && this.index < 18100 && interval >= 10){
 					emitNewTuple();
 				}
-				if(this.index >= 13000 && this.index < 14000 && interval >= 50){
+				if(this.index >= 18100 && this.index < 20600 && interval >= 50){
 					emitNewTuple();
 				}
-				if(this.index >= 14000 && this.index < 14500 && interval >= 100){
+				if(this.index >= 20600 && this.index < 21600 && interval >= 150){
 					emitNewTuple();
 				}
-				if(this.index >= 14500 && this.index < 15000 && interval >= 250){
-					emitNewTuple();
-				}
-				if(this.index >= 15000 && this.index < 16500 && interval >= 1){
-					emitNewTuple();
-				}
-				if(this.index >= 16500 && this.index < 18000 && interval >= 250){
+				if(this.index >= 21600 && this.index < 22000 && interval >= 250){
 					emitNewTuple();
 				}
 			}else{
