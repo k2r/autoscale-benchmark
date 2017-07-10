@@ -276,14 +276,14 @@ public class SyntheticStreamSpout implements IRichSpout {
 	 */
 	@Override
 	public void fail(Object msgId) {
-		Integer id = (Integer) msgId;
+		/*Integer id = (Integer) msgId;
 		String tupleAsString = this.replayQueue.get(id);
 		String[] values = tupleAsString.split(";");
 		String name = values[0];
 		Integer age = Integer.parseInt(values[1]);
 		String city = values[2];
 		String opinion = values[3];
-		this.collector.emit(new Values(name, age, city, opinion), id);
+		this.collector.emit(new Values(name, age, city, opinion), id);*/
 	}
 	
 	/* (non-Javadoc)
