@@ -170,7 +170,7 @@ public class SyntheticStreamSpout implements IRichSpout {
 				if(this.index >= 3000 && this.index < 6000 && interval >= 20){
 					emitNewTuple();
 				}
-				if(this.index >= 6000 && this.index < 12000 && interval >= 1){
+				if(this.index >= 6000 && this.index < 12000 && interval >= 5){
 					emitNewTuple();
 				}
 				if(this.index >= 12000 && this.index < 15000 && interval >= 20){
@@ -188,35 +188,29 @@ public class SyntheticStreamSpout implements IRichSpout {
 		}
 		
 		if(this.stream == 2){
-			if(this.index < 22000){
+			if(this.index < 16000){
 				Long lastEmission = Long.parseLong(new String(this.zkClient.getDate()));
 				Long now = System.currentTimeMillis();
 				Long interval = now - lastEmission;
-				if(this.index < 600 && interval >= 250){
+				if(this.index < 500 && interval >= 250){
 					emitNewTuple();
 				}
-				if(this.index >= 600 && this.index < 1600 && interval >= 150){
+				if(this.index >= 500 && this.index < 1500 && interval >= 150){
 					emitNewTuple();
 				}
-				if(this.index >= 1600 && this.index < 4100 && interval >= 50){
+				if(this.index >= 1500 && this.index < 4000 && interval >= 50){
 					emitNewTuple();
 				}
-				if(this.index >= 4100 && this.index < 12100 && interval >= 10){
+				if(this.index >= 4000 && this.index < 12000 && interval >= 20){
 					emitNewTuple();
 				}
-				if(this.index >= 12100 && this.index < 13100 && interval >= 1){
+				if(this.index >= 12000 && this.index < 14500 && interval >= 50){
 					emitNewTuple();
 				}
-				if(this.index >= 13100 && this.index < 18100 && interval >= 10){
+				if(this.index >= 14500 && this.index < 15500 && interval >= 150){
 					emitNewTuple();
 				}
-				if(this.index >= 18100 && this.index < 20600 && interval >= 50){
-					emitNewTuple();
-				}
-				if(this.index >= 20600 && this.index < 21600 && interval >= 150){
-					emitNewTuple();
-				}
-				if(this.index >= 21600 && this.index < 22000 && interval >= 250){
+				if(this.index >= 15500 && this.index < 16000 && interval >= 250){
 					emitNewTuple();
 				}
 			}else{
@@ -232,25 +226,25 @@ public class SyntheticStreamSpout implements IRichSpout {
 				if(this.index < 720 && interval >= 250){
 					emitNewTuple();
 				}
-				if(this.index >= 720 && this.index < 4720 && interval >= 1){
+				if(this.index >= 720 && this.index < 4720 && interval >= 5){
 					emitNewTuple();
 				}
 				if(this.index >= 4720 && this.index < 5440 && interval >= 250){
 					emitNewTuple();
 				}
-				if(this.index >= 5440 && this.index < 9440 && interval >= 1){
+				if(this.index >= 5440 && this.index < 9440 && interval >= 5){
 					emitNewTuple();
 				}
 				if(this.index >= 9440 && this.index < 10160 && interval >= 250){
 					emitNewTuple();
 				}
-				if(this.index >= 10160 && this.index < 15160 && interval >= 1){
+				if(this.index >= 10160 && this.index < 15160 && interval >= 5){
 					emitNewTuple();
 				}
 				if(this.index >= 15160 && this.index < 15880 && interval >= 250){
 					emitNewTuple();
 				}
-				if(this.index >= 15880 && this.index < 20880 && interval >= 1){
+				if(this.index >= 15880 && this.index < 20880 && interval >= 5){
 					emitNewTuple();
 				}
 				if(this.index >= 20880 && this.index < 21600 && interval >= 250){
