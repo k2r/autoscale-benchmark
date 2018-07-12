@@ -1,10 +1,10 @@
 /**
  * 
  */
-package stormBench.stormBench.operator.bolt.advertising;
+package stormBench.stormBench.operator.bolt.benchmark;
 
-import java.util.HashMap;
 import java.util.Map;
+import java.util.logging.Logger;
 
 import org.apache.storm.task.OutputCollector;
 import org.apache.storm.task.TopologyContext;
@@ -12,24 +12,18 @@ import org.apache.storm.topology.IRichBolt;
 import org.apache.storm.topology.OutputFieldsDeclarer;
 import org.apache.storm.tuple.Tuple;
 
-import stormBench.stormBench.utils.FieldNames;
-
 /**
  * @author Roland
  *
  */
-public class IPProcessor implements IRichBolt {
-	
+public class SimpleFinalizer implements IRichBolt {
+
 	/**
 	 * 
 	 */
-	private static final long serialVersionUID = 6459774252378555862L;
+	private static final long serialVersionUID = -3146352036240971007L;
+	private static Logger logger = Logger.getLogger("SimpleFinalizer");
 	private OutputCollector collector;
-	private HashMap<String, Integer> addresses;
-	
-	public IPProcessor() {
-		this.addresses = new HashMap<>();
-	}
 	
 	/* (non-Javadoc)
 	 * @see org.apache.storm.task.IBolt#prepare(java.util.Map, org.apache.storm.task.TopologyContext, org.apache.storm.task.OutputCollector)
@@ -37,7 +31,6 @@ public class IPProcessor implements IRichBolt {
 	@SuppressWarnings("rawtypes")
 	@Override
 	public void prepare(Map stormConf, TopologyContext context, OutputCollector collector) {
-		
 		this.collector = collector;
 	}
 
@@ -46,18 +39,6 @@ public class IPProcessor implements IRichBolt {
 	 */
 	@Override
 	public void execute(Tuple input) {
-		String ipAdress = input.getStringByField(FieldNames.IP.toString());
-		Integer occurence = addresses.get(ipAdress);
-		if(occurence == null){
-			occurence = 0;
-		}
-		occurence++;
-		this.addresses.put(ipAdress, occurence);
-		try {
-			Thread.sleep(400);
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
 		this.collector.ack(input);
 	}
 
@@ -66,6 +47,8 @@ public class IPProcessor implements IRichBolt {
 	 */
 	@Override
 	public void cleanup() {
+		logger.fine("Cleaning up SimpleFinalizer " + serialVersionUID + "...");
+
 	}
 
 	/* (non-Javadoc)

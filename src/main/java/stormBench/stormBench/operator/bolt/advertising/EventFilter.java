@@ -56,6 +56,12 @@ public class EventFilter implements IRichBolt {
 			
 			this.collector.emit(new Values(userID, pageID, adID, adType, eventType, eventTime, ipAddress));
 		}
+		try {
+			Thread.sleep(2);
+		} catch (InterruptedException e) {
+			
+			e.printStackTrace();
+		}
 		this.collector.ack(input);
 	}
 

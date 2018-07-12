@@ -1,7 +1,7 @@
 /**
  * 
  */
-package stormBench.stormBench.operator.spout.opinion;
+package stormBench.stormBench.operator.spout.benchmark;
 
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
@@ -92,7 +92,7 @@ public class SyntheticStreamSpout implements IRichSpout {
 			}
 			byte[] rawDate = new Long(System.currentTimeMillis()).toString().getBytes();
 			this.zkClient.persistDate(rawDate);
-			System.out.println("Emission date successfully reinitialized on zNode");
+			System.out.println("Emission date successfully updated on zNode");
 		} catch (NumberFormatException | UnsupportedEncodingException e) {
 			logger.severe("Unable to decode the current state");
 		}
@@ -121,7 +121,7 @@ public class SyntheticStreamSpout implements IRichSpout {
 	public void deactivate() {
 		logger.fine("The increasing stream spout is being deactivated....");
 	}
-	
+
 	public void emitNewTuple(){
 		String name = "anonymous_user";
 		Integer age =  16;
@@ -154,32 +154,32 @@ public class SyntheticStreamSpout implements IRichSpout {
 	@Override
 	public void nextTuple() {
 		if(this.stream == 1){
-			if(this.index < 18000){
+			if(this.index < 15000){
 				Long lastEmission = Long.parseLong(new String(this.zkClient.getDate()));
 				Long now = System.currentTimeMillis();
 				Long interval = now - lastEmission;
-				if(this.index < 6000 && interval >= 1){
+				if(this.index < 400 && interval >= 250){
 					emitNewTuple();
 				}
-				if(this.index >= 6000 && this.index < 7200 && interval >= 40){
+				if(this.index >= 400 && this.index < 1200 && interval >= 100){
 					emitNewTuple();
 				}
-				if(this.index >= 7200 && this.index < 8400 && interval >= 50){
+				if(this.index >= 1200 && this.index < 2500 && interval >= 50){
 					emitNewTuple();
 				}
-				if(this.index >= 8400 && this.index < 11400 && interval >= 20){
+				if(this.index >= 2500 && this.index < 5000 && interval >= 20){
 					emitNewTuple();
 				}
-				if(this.index >= 11400 && this.index < 12000 && interval >= 100){
+				if(this.index >= 5000 && this.index < 10000 && interval >= 5){
 					emitNewTuple();
 				}
-				if(this.index >= 12000 && this.index < 15000 && interval >= 20){
+				if(this.index >= 10000 && this.index < 12500 && interval >= 20){
 					emitNewTuple();
 				}
-				if(this.index >= 15000 && this.index < 16200 && interval >= 5){
+				if(this.index >= 12500 && this.index < 14000 && interval >= 50){
 					emitNewTuple();
 				}
-				if(this.index >= 16200 && this.index < 18000 && interval >= 100){
+				if(this.index >= 14000 && this.index < 15000 && interval >= 250){
 					emitNewTuple();
 				}
 			}else{
@@ -188,29 +188,41 @@ public class SyntheticStreamSpout implements IRichSpout {
 		}
 		
 		if(this.stream == 2){
-			if(this.index < 16000){
+			if(this.index < 15000){
 				Long lastEmission = Long.parseLong(new String(this.zkClient.getDate()));
 				Long now = System.currentTimeMillis();
 				Long interval = now - lastEmission;
-				if(this.index < 500 && interval >= 250){
+				if(this.index < 400 && interval >= 250){
 					emitNewTuple();
 				}
-				if(this.index >= 500 && this.index < 1500 && interval >= 150){
+				if(this.index >= 400 && this.index < 800 && interval >= 100){
 					emitNewTuple();
 				}
-				if(this.index >= 1500 && this.index < 4000 && interval >= 50){
+				if(this.index >= 800 && this.index < 2800 && interval >= 5){
 					emitNewTuple();
 				}
-				if(this.index >= 4000 && this.index < 12000 && interval >= 20){
+				if(this.index >= 2800 && this.index < 4800 && interval >= 50){
 					emitNewTuple();
 				}
-				if(this.index >= 12000 && this.index < 14500 && interval >= 50){
+				if(this.index >= 4800 && this.index < 6800 && interval >= 5){
 					emitNewTuple();
 				}
-				if(this.index >= 14500 && this.index < 15500 && interval >= 150){
+				if(this.index >= 6800 && this.index < 7200 && interval >= 100){
 					emitNewTuple();
 				}
-				if(this.index >= 15500 && this.index < 16000 && interval >= 250){
+				if(this.index >= 7200 && this.index < 8200 && interval >= 5){
+					emitNewTuple();
+				}
+				if(this.index >= 8200 && this.index < 8700 && interval >= 250){
+					emitNewTuple();
+				}
+				if(this.index >= 8700 && this.index < 13700 && interval >= 20){
+					emitNewTuple();
+				}
+				if(this.index >= 13700 && this.index < 14500 && interval >= 50){
+					emitNewTuple();
+				}
+				if(this.index >= 14500 && this.index < 15000 && interval >= 250){
 					emitNewTuple();
 				}
 			}else{
@@ -219,35 +231,11 @@ public class SyntheticStreamSpout implements IRichSpout {
 		}
 		
 		if(this.stream == 3){
-			if(this.index < 21600){
+			if(this.index < 30000){
 				Long lastEmission = Long.parseLong(new String(this.zkClient.getDate()));
 				Long now = System.currentTimeMillis();
 				Long interval = now - lastEmission;
-				if(this.index < 720 && interval >= 250){
-					emitNewTuple();
-				}
-				if(this.index >= 720 && this.index < 4720 && interval >= 5){
-					emitNewTuple();
-				}
-				if(this.index >= 4720 && this.index < 5440 && interval >= 250){
-					emitNewTuple();
-				}
-				if(this.index >= 5440 && this.index < 9440 && interval >= 5){
-					emitNewTuple();
-				}
-				if(this.index >= 9440 && this.index < 10160 && interval >= 250){
-					emitNewTuple();
-				}
-				if(this.index >= 10160 && this.index < 15160 && interval >= 5){
-					emitNewTuple();
-				}
-				if(this.index >= 15160 && this.index < 15880 && interval >= 250){
-					emitNewTuple();
-				}
-				if(this.index >= 15880 && this.index < 20880 && interval >= 5){
-					emitNewTuple();
-				}
-				if(this.index >= 20880 && this.index < 21600 && interval >= 250){
+				if(this.index < 30000 && interval >= 50){
 					emitNewTuple();
 				}
 			}else{
@@ -263,6 +251,7 @@ public class SyntheticStreamSpout implements IRichSpout {
 	public void ack(Object msgId) {
 		Integer id = (Integer) msgId;
 		this.replayQueue.remove(id);
+
 	}
 
 	/* (non-Javadoc)
@@ -270,16 +259,8 @@ public class SyntheticStreamSpout implements IRichSpout {
 	 */
 	@Override
 	public void fail(Object msgId) {
-		/*Integer id = (Integer) msgId;
-		String tupleAsString = this.replayQueue.get(id);
-		String[] values = tupleAsString.split(";");
-		String name = values[0];
-		Integer age = Integer.parseInt(values[1]);
-		String city = values[2];
-		String opinion = values[3];
-		this.collector.emit(new Values(name, age, city, opinion), id);*/
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.apache.storm.topology.IComponent#declareOutputFields(org.apache.storm.topology.OutputFieldsDeclarer)
 	 */

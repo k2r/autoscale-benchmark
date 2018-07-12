@@ -153,32 +153,32 @@ public class AdvertisingStreamSpout implements IRichSpout {
 	 */
 	@Override
 	public void nextTuple() {
-		if(this.index < 18000){
+		if(this.index < 10000){
 			Long lastEmission = Long.parseLong(new String(this.zkClient.getDate()));
 			Long now = System.currentTimeMillis();
 			Long interval = now - lastEmission;
-			if(this.index < 600 && interval >= 250){
+			if(this.index < 100 && interval >= 250){
 				emitNewTuple();
 			}
-			if(this.index >= 600 && this.index < 1800 && interval >= 100){
+			if(this.index >= 100 && this.index < 1100 && interval >= 1){
 				emitNewTuple();
 			}
-			if(this.index >= 1800 && this.index < 3000 && interval >= 50){
+			if(this.index >= 1100 && this.index < 5000 && interval >= 10){
 				emitNewTuple();
 			}
-			if(this.index >= 3000 && this.index < 6000 && interval >= 20){
+			if(this.index >= 5000 && this.index < 7000 && interval >= 20){
 				emitNewTuple();
 			}
-			if(this.index >= 6000 && this.index < 12000 && interval >= 1){
+			if(this.index >= 7000 && this.index < 10000 && interval >= 1){
 				emitNewTuple();
 			}
-			if(this.index >= 12000 && this.index < 15000 && interval >= 20){
+			if(this.index >= 10000 && this.index < 10200 && interval >= 100){
 				emitNewTuple();
 			}
-			if(this.index >= 15000 && this.index < 16200 && interval >= 50){
+			if(this.index >= 10200 && this.index < 13000 && interval >= 5){
 				emitNewTuple();
 			}
-			if(this.index >= 16200 && this.index < 18000 && interval >= 250){
+			if(this.index >= 13000 && this.index < 13500 && interval >= 10){
 				emitNewTuple();
 			}
 		}else{

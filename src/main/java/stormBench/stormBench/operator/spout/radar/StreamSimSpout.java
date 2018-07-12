@@ -3,8 +3,7 @@
  */
 package stormBench.stormBench.operator.spout.radar;
 
-import java.rmi.registry.LocateRegistry;
-import java.rmi.registry.Registry;
+import java.rmi.RemoteException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Logger;
@@ -16,7 +15,9 @@ import org.apache.storm.topology.OutputFieldsDeclarer;
 import org.apache.storm.tuple.Fields;
 import org.apache.storm.tuple.Values;
 import core.element.IElement;
-import core.network.rmi.source.IRMIStreamSource;
+import core.element.relational.RelationalStreamElement;
+import core.network.rmi.consumer.IRMIStreamConsumer;
+import core.network.rmi.consumer.RMIStreamConsumer;
 import stormBench.stormBench.utils.FieldNames;
 
 /**
@@ -56,23 +57,12 @@ public class StreamSimSpout implements IRichSpout {
 	 * @return the last set of tuples sent by the stream source
 	 */
 	public IElement[] getInputStream(){
+		IRMIStreamConsumer consumer;
 		IElement[] input = new IElement[0];
 		try {
-			Registry registry = LocateRegistry.getRegistry(host, port);
-			if(registry != null){
-				String[] resources = registry.list();
-				int n = resources.length;
-				for(int i = 0; i < n; i++){
-					if(resources[i].equalsIgnoreCase("tuples")){
-						IRMIStreamSource stub = (IRMIStreamSource) registry.lookup("tuples");
-						input = stub.getInputStream();
-						registry.unbind("tuples");
-						break;
-					}
-				}
-			}
-		}catch(Exception e){
-			logger.severe("Client exception: " + e.toString());
+			consumer = new RMIStreamConsumer(this.host, this.port, "tuples");
+			input = consumer.consume();
+		} catch (RemoteException e) {
 			e.printStackTrace();
 		}
 		return input;
@@ -131,8 +121,8 @@ public class StreamSimSpout implements IRichSpout {
 			}
 		}
 		if(this.receiveIndex > this.sendIndex){
-			IElement element = this.inputQueue.get(this.sendIndex);
-			Object[] values = element.getValues();
+			RelationalStreamElement element = (RelationalStreamElement) this.inputQueue.get(this.sendIndex);
+			Object[] values = element.getStreamElement();
 			String registration = (String) values[0];
 			Integer speed = (Integer) values[1];
 			String make = (String) values[2];
@@ -161,8 +151,8 @@ public class StreamSimSpout implements IRichSpout {
 	@Override
 	public void fail(Object msgId) {
 		Integer id  = (Integer) msgId;
-		IElement element = this.inputQueue.get(id);
-		Object[] values = element.getValues();
+		RelationalStreamElement element = (RelationalStreamElement) this.inputQueue.get(this.sendIndex);
+		Object[] values = element.getStreamElement();
 		String registration = (String) values[0];
 		Integer speed = (Integer) values[1];
 		String make = (String) values[2];

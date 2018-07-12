@@ -1,7 +1,6 @@
 package stormBench.stormBench.operator.spout.opinion;
 
-import java.rmi.registry.LocateRegistry;
-import java.rmi.registry.Registry;
+import java.rmi.RemoteException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Logger;
@@ -14,7 +13,9 @@ import org.apache.storm.tuple.Fields;
 import org.apache.storm.tuple.Values;
 
 import core.element.IElement;
-import core.network.rmi.source.IRMIStreamSource;
+import core.element.relational.RelationalStreamElement;
+import core.network.rmi.consumer.IRMIStreamConsumer;
+import core.network.rmi.consumer.RMIStreamConsumer;
 import stormBench.stormBench.utils.FieldNames;
 
 public class StreamSimSpout implements IRichSpout {
@@ -26,7 +27,6 @@ public class StreamSimSpout implements IRichSpout {
 	private static Logger logger = Logger.getLogger("StreamSimSpout");
 	private String host;
 	private int port;
-	private int counter;
 	private HashMap<Integer, IElement> inputQueue;
 	private Integer sendIndex;
 	private Integer receiveIndex;
@@ -38,33 +38,19 @@ public class StreamSimSpout implements IRichSpout {
 	public StreamSimSpout(String host, int port) {
 		this.host = host;
 		this.port = port;
-		this.counter = 0;
 		this.inputQueue = new HashMap<>();
 		this.sendIndex = 0;
 		this.receiveIndex = 0;
 	}
 	
 	public IElement[] getInputStream(){
+		IRMIStreamConsumer consumer;
 		IElement[] input = new IElement[0];
 		try {
-			Registry registry = LocateRegistry.getRegistry(host, port);
-			if(registry != null){
-				String[] resources = registry.list();
-				int n = resources.length;
-				for(int i = 0; i < n; i++){
-					if(resources[i].equalsIgnoreCase("tuples")){
-						IRMIStreamSource stub = (IRMIStreamSource) registry.lookup("tuples");
-						int chunkCounter = stub.getChunkCounter();
-						if(chunkCounter > this.counter){
-							this.counter++;
-							input = stub.getInputStream();
-						}
-						break;
-					}
-				}
-			}
-		}catch(Exception e){
-			logger.info("No registry found at host " + host + " port " + port);
+			consumer = new RMIStreamConsumer(this.host, this.port, "tuples");
+			input = consumer.consume();
+		} catch (RemoteException e) {
+			e.printStackTrace();
 		}
 		return input;
 	}
@@ -101,8 +87,8 @@ public class StreamSimSpout implements IRichSpout {
 			}
 		}
 		if(this.receiveIndex > this.sendIndex){
-			IElement element = this.inputQueue.get(this.sendIndex);
-			Object[] values = element.getValues();
+			RelationalStreamElement element = (RelationalStreamElement) this.inputQueue.get(this.sendIndex);
+			Object[] values = element.getStreamElement();
 			String name = (String) values[0];
 			Integer age = (Integer) values[1];
 			String city = (String) values[2];
@@ -129,8 +115,8 @@ public class StreamSimSpout implements IRichSpout {
 	@Override
 	public void fail(Object msgId) {
 		Integer id  = (Integer) msgId;
-		IElement element = this.inputQueue.get(id);
-		Object[] values = element.getValues();
+		RelationalStreamElement element = (RelationalStreamElement) this.inputQueue.get(id);
+		Object[] values = element.getStreamElement();
 		String name = (String) values[0];
 		Integer age = (Integer) values[1];
 		String city = (String) values[2];
